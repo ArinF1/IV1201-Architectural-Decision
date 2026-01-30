@@ -1,0 +1,16 @@
+# Docker Compose configuration for PostgreSQL database
+# Provides a local PostgreSQL instance for development and testing and is used by backend Express application via sequelize. 
+services:
+ db:
+   image: postgres:16
+   environment:
+     POSTGRES_USER: iv1201
+     POSTGRES_PASSWORD: iv1201
+     POSTGRES_DB: iv1201db
+   volumes:
+     - iv1201_pgdata:/var/lib/postgresql/data
+   ports:
+     - "5432:5432"
+
+volumes:
+  iv1201_pgdata:
