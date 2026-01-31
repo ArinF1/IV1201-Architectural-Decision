@@ -7,7 +7,7 @@ const { Sequelize } = require('sequelize');  // Imports sequelize library
 * @returns - returns a Sequelize instance connected to the database.
 */
 function createSequelizeInstance() {
-    const databaseURL = ProcessingInstruction.env.DATABASE_URL;
+    const databaseURL = process.env.DATABASE_URL;
     if (!databaseURL) {
         throw new Error("DATABASE_URL is not set in environment variables"); 
     }
@@ -17,6 +17,6 @@ function createSequelizeInstance() {
     });
 }
 
-const sequelize = createSequelizeInstance(); // Create the Sequelize instance
+const sequelize = createSequelizeInstance();
 
 module.exports = {sequelize}; // Export the sequelize instance for use in other parts of the application
