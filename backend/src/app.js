@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Express application configuration
+ * @module app
+ */
+
 const express = require('express');
 const cors = require('cors');
 const userRoutes = require('./routes/userRoutes');
@@ -16,4 +21,8 @@ app.use((err, req, res, next) => {
   res.status(status).json({ error: message });
 });
 
+/**
+ * Configured Express application instance
+ * @type {express.Application}
+ */
 module.exports = app;

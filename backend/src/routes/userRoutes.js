@@ -1,3 +1,8 @@
+/**
+ * @fileoverview User routes
+ * @module routes/userRoutes
+ */
+
 const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/userController');
@@ -37,4 +42,8 @@ router.delete('/:id', (req, res, next) => {
   userController.deleteUser(req, res, next);
 });
 
+/**
+ * Express router for user endpoints
+ * @type {express.Router}
+ */
 module.exports = router;
