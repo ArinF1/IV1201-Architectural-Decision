@@ -7,9 +7,9 @@ const {Message} = require("../db"); // Imports the Message model
  * async function because it involves db operations, inherently asynchronous.
  *  */
 
-async function createMessage(text) {
-    const created = await Message.create({ text });
-    return created;
+async function createMessage(text, transaction = null) {
+    const created = await Message.create({ text }, { transaction }); // Creates a new message record in the database
+    return created.get({ plain: true }); 
 }
 
 /**
@@ -23,6 +23,7 @@ async function listMessages(limit = 50) {
     const rows = await Message.findAll({ 
         order: [['createdAt', 'DESC']], // Orders messages by creation date descending
         limit, // calls limit param
+        raw: true
     });
     return rows;
 }
