@@ -1,3 +1,15 @@
+/**
+ * @fileoverview User controller
+ * @module controllers/userController
+ */
+
+/**
+ * Retrieve all users
+ * @param {express.Request} req - Express request object
+ * @param {express.Response} res - Express response object
+ * @param {express.NextFunction} next - Express next middleware function
+ * @returns {Promise<void>}
+ */
 exports.getAllUsers = async (req, res, next) => {
   try {
     res.status(200).json({ message: 'Get all users' });
@@ -6,6 +18,13 @@ exports.getAllUsers = async (req, res, next) => {
   }
 };
 
+/**
+ * Retrieve a single user by ID
+ * @param {express.Request} req - Express request object
+ * @param {express.Response} res - Express response object
+ * @param {express.NextFunction} next - Express next middleware function
+ * @returns {Promise<void>}
+ */
 exports.getUserById = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -15,6 +34,13 @@ exports.getUserById = async (req, res, next) => {
   }
 };
 
+/**
+ * Create a new user
+ * @param {express.Request} req - Express request object
+ * @param {express.Response} res - Express response object
+ * @param {express.NextFunction} next - Express next middleware function
+ * @returns {Promise<void>}
+ */
 exports.createUser = async (req, res, next) => {
   try {
     res.status(201).json({ message: 'User created' });
@@ -23,6 +49,13 @@ exports.createUser = async (req, res, next) => {
   }
 };
 
+/**
+ * Update an existing user
+ * @param {express.Request} req - Express request object
+ * @param {express.Response} res - Express response object
+ * @param {express.NextFunction} next - Express next middleware function
+ * @returns {Promise<void>}
+ */
 exports.updateUser = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -32,6 +65,13 @@ exports.updateUser = async (req, res, next) => {
   }
 };
 
+/**
+ * Delete a user
+ * @param {express.Request} req - Express request object
+ * @param {express.Response} res - Express response object
+ * @param {express.NextFunction} next - Express next middleware function
+ * @returns {Promise<void>}
+ */
 exports.deleteUser = async (req, res, next) => {
   try {
     const { id } = req.params;
