@@ -2,6 +2,7 @@
  * @fileoverview Express application configuration
  * @module app
  */
+const { errorHandler } = require('./middleware/errorHandler');
 
 const messageRoutes = require('./routes/messageRoutes');
 
@@ -23,14 +24,14 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/users', userRoutes);
 app.use('/api/messages', messageRoutes);
 
-app.use((err, req, res, next) => {
-  const status = err.status || 500;
-  const message = err.message || 'Internal server error';
-  res.status(status).json({ error: message });
-});
 
+
+app.use(errorHandler);
 /**
  * Configured Express application instance
  * @type {express.Application}
  */
 module.exports = app;
+
+app.use(errorHandler);
+
