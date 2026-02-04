@@ -33,5 +33,5 @@ app.use(errorHandler);
  */
 module.exports = app;
 
-app.use(errorHandler);
+
 
