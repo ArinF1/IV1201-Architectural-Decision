@@ -1,4 +1,4 @@
-const {Message} = require("../db"); // Imports the Message model
+const {Application} = require("../db"); // Imports the Message model
 
 /**
  * Creates a new application in the database with the provided text.

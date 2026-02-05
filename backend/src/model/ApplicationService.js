@@ -1,4 +1,4 @@
-const messageRepo = require('../integration/repositories/applicationRepo');
+const applicationRepo = require('../integration/repositories/applicationRepo');
 
 const { sequelize } = require('../integration/db');
 
@@ -22,10 +22,11 @@ class ApplicationService {
      * function to get recent applications via application repository that lists the last 50 applications
      */
     async getRecentApplications() {
-        return await messageRepo.listApplications(50);
-          const err = new Error("Application content cannot be empty");
-            err.status = 400;
-  throw err;
+        const applications = await applicationRepo.listApplications(50);
+        if (!applications) {
+            throw new Error("Failed to retrieve applications");
+        }
+        return applications;
     }
 }
 
