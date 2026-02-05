@@ -1,7 +1,7 @@
 const {sequelize} = require('./sequelize'); // Imports config. sequelize instance
-const {defineMessageModel} = require('./models/message'); // Imports model definitions
+const {defineApplicationModel} = require('./models/application'); // Imports model definitions
 
-const Message = defineMessageModel(sequelize); // Defines the Message model
+const Application = defineApplicationModel(sequelize); // Defines the Application model
 
 /*
 * Database is initialized and synched with the defined models. 
@@ -14,4 +14,4 @@ async function initDb() {
     await sequelize.sync();  //syncs the db tables with the defined models
 }
 
-module.exports = { sequelize, Message, initDb };
+module.exports = { sequelize, Application, initDb };

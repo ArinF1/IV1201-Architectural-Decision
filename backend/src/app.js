@@ -4,7 +4,7 @@
  */
 const { errorHandler } = require('./middleware/errorHandler');
 
-const messageRoutes = require('./routes/messageRoutes');
+const applicationRoutes = require('./routes/applicationRoutes');
 
 const express = require('express');
 const cors = require('cors');
@@ -22,7 +22,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use('/api/users', userRoutes);
-app.use('/api/messages', messageRoutes);
+app.use('/api/applications', applicationRoutes);
 
 
 

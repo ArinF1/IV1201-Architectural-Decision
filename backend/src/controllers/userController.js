@@ -10,7 +10,8 @@
  * @param {express.NextFunction} next - Express next middleware function
  * @returns {Promise<void>}
  */
-const UserService = require('../model/UserService.js'); 
+const { application } = require('express');
+const userService = require('../model/UserService.js'); 
 const UserDTO = require('../model/userDTO');
 
 exports.getAllUsers = async (req, res, next) => {
@@ -103,7 +104,7 @@ exports.createUser = async (req, res, next) => {
 exports.updateUser = async (req, res, next) => {
   try {
     const { id } = req.params;
-    res.status(200).json({ message: `User ${id} updated` });
+    res.status(200).json({ application: `User ${id} updated` });
   } catch (error) {
     next(error);
   }
@@ -119,7 +120,7 @@ exports.updateUser = async (req, res, next) => {
 exports.deleteUser = async (req, res, next) => {
   try {
     const { id } = req.params;
-    res.status(200).json({ message: `User ${id} deleted` });
+    res.status(200).json({ application: `User ${id} deleted` });
   } catch (error) {
     next(error);
   }

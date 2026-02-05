@@ -1,14 +1,14 @@
 const { Sequelize, DataTypes } = require('sequelize');  // Imports sequelize library
 
 /*
-* This function defines the Message model in the database.
+* This function defines the Application model in the database.
 * It includes fields for id and text and with appropriate data types/constraints
-* The model ("messages") is the table name in the database.
+* The model ("applications") is the table name in the database.
 * @param sequelize - The Sequelize instance to define the model on.
-* @returns Message - The defined Message model.
+* @returns Application - The defined Application model.
 */
-function defineMessageModel(sequelize) {
-    const Message = sequelize.define('Message', {
+function defineApplicationModel(sequelize) {
+    const Application = sequelize.define('Application', {
        id: {
             type: DataTypes.INTEGER,
             autoIncrement: true,
@@ -19,11 +19,11 @@ function defineMessageModel(sequelize) {
             allowNull: false,
         },
     }, {
-        tableName: "messages", 
+        tableName: "applications", 
         timestamps: true, 
     });
 
-    return Message;
+    return Application;
 }
 
-module.exports = { defineMessageModel };  // Exports the model definition function
+module.exports = { defineApplicationModel };  // Exports the model definition function
