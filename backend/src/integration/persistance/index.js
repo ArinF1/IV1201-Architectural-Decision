@@ -11,7 +11,6 @@ const Application = defineApplicationModel(sequelize); // Defines the Applicatio
 
 async function initDb() {
     await sequelize.authenticate();
-    await sequelize.sync();  //syncs the db tables with the defined models
 }
 
 module.exports = { sequelize, Application, initDb };

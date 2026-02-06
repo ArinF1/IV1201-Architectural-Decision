@@ -6,7 +6,7 @@
 require('dotenv').config();
 
 const app = require('./app');
-const { initDb } = require('./integration/db');
+const { initDb } = require('./integration/persistance');
 
 
 const PORT = process.env.PORT || 3000;

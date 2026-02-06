@@ -10,7 +10,6 @@
  * @param {express.NextFunction} next - Express next middleware function
  * @returns {Promise<void>}
  */
-const { application } = require('express');
 const userService = require('../model/UserService.js'); 
 const UserDTO = require('../model/userDTO');
 

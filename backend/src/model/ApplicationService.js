@@ -1,6 +1,6 @@
 const applicationRepo = require('../integration/repositories/applicationRepo');
 
-const { sequelize } = require('../integration/db');
+const { sequelize } = require('../integration/persistance');
 
 class ApplicationService {
  
@@ -13,7 +13,7 @@ class ApplicationService {
                 throw new Error("Application content cannot be empty");
             }
 
-            const applicationData = await messageRepo.createApplication(text, t); // Passes the transaction object
+            const applicationData = await applicationRepo.createApplication(text, t); // Passes the transaction object
             return applicationData;
         });
     }
