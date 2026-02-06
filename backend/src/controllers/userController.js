@@ -39,9 +39,7 @@ exports.getUserById = async (req, res, next) => {
     const user = await userService.getUserById(id);
 
     if (!user) {
-      const error = new Error('User not found');
-      error.status = 404;
-      throw error;
+      return res.status(404).json({ error: 'User not found' });
     }
 
     const userResponse = new UserDTO(
