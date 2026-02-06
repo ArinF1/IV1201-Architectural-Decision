@@ -11,36 +11,13 @@ router.get('/', (req, res, next) => {
   userController.getAllUsers(req, res, next);
 });
 
-router.get('/:id', (req, res, next) => {
-  if (!req.params.id) {
-    return res.status(400).json({ error: 'User ID is required' });
-  }
-  userController.getUserById(req, res, next);
-});
+router.get('/:id', userController.getUserById);
 
-router.post('/', (req, res, next) => {
-  if (!req.body) {
-    return res.status(400).json({ error: 'Request body is required' });
-  }
-  userController.createUser(req, res, next);
-});
+router.post('/', userController.createUser);
 
-router.put('/:id', (req, res, next) => {
-  if (!req.params.id) {
-    return res.status(400).json({ error: 'User ID is required' });
-  }
-  if (!req.body) {
-    return res.status(400).json({ error: 'Request body is required' });
-  }
-  userController.updateUser(req, res, next);
-});
+router.put('/:id', userController.updateUser);
 
-router.delete('/:id', (req, res, next) => {
-  if (!req.params.id) {
-    return res.status(400).json({ error: 'User ID is required' });
-  }
-  userController.deleteUser(req, res, next);
-});
+router.delete('/:id', userController.deleteUser);
 
 /**
  * Express router for user endpoints
