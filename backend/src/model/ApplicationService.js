@@ -1,4 +1,5 @@
 const applicationRepo = require('../integration/repositories/applicationRepo');
+const ApplicationDTO = require('./ApplicationDTO');
 
 const { sequelize } = require('../integration/persistance');
 
@@ -13,8 +14,7 @@ class ApplicationService {
                 throw new Error("Application content cannot be empty");
             }
 
-            const applicationData = await applicationRepo.createApplication(text, t); // Passes the transaction object
-            return applicationData;
+            return await applicationRepo.createApplication(text, t);
         });
     }
 
@@ -26,8 +26,12 @@ class ApplicationService {
         if (!applications) {
             throw new Error("Failed to retrieve applications");
         }
-        return applications;
+        return applications.map(app => 
+            new ApplicationDTO(app.name, app.surname, app.status || 'unhandled')
+        );
     }
+
+
 }
 
 module.exports = new ApplicationService();

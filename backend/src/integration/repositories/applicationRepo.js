@@ -1,5 +1,7 @@
 const {Application} = require("../persistance"); // Imports the Message model
 
+const { Person } = require('../persistance');
+
 /**
  * Creates a new application in the database with the provided text.
  * @param text - The text content of the application to be created.
@@ -20,15 +22,18 @@ async function createApplication(text, transaction = null) {
  * *  */
 
 async function listApplications(limit = 50) {
-    const rows = await Application.findAll({ 
-        order: [['createdAt', 'DESC']], // Orders applications by creation date descending
-        limit, // calls limit param
+    return await Person.findAll({
+        where: { role_id: 2 },
+        attributes: ['name', 'surname'], 
+        limit: limit,
         raw: true
     });
-    return rows;
 }
+
+
 
 module.exports = {
     createApplication,
     listApplications,
+    
 };
