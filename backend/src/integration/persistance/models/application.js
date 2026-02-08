@@ -2,7 +2,7 @@ const { Sequelize, DataTypes } = require('sequelize');  // Imports sequelize lib
 
 /*
 * This function defines the Application model in the database.
-* It includes fields for id and text and with appropriate data types/constraints
+* It includes fields for id, person_id, and status with appropriate data types/constraints
 * The model ("applications") is the table name in the database.
 * @param sequelize - The Sequelize instance to define the model on.
 * @returns Application - The defined Application model.
@@ -14,8 +14,17 @@ function defineApplicationModel(sequelize) {
             autoIncrement: true,
             primaryKey: true,
         },
-        text: {
-            type: DataTypes.STRING(500),
+        person_id: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            references: {
+                model: 'person',
+                key: 'person_id',
+            },
+        },
+        status: {
+            type: DataTypes.ENUM('unhandled', 'accepted', 'rejected'),
+            defaultValue: 'unhandled',
             allowNull: false,
         },
     }, {

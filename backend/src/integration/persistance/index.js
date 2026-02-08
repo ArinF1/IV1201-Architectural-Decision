@@ -1,7 +1,28 @@
 const {sequelize} = require('./sequelize'); // Imports config. sequelize instance
 const {defineApplicationModel} = require('./models/application'); // Imports model definitions
+const {definePersonModel} = require('../../model/person');
+const {defineCompetenceModel} = require('./models/competence');
+const {defineCompetenceProfileModel} = require('./models/competenceProfile');
+const {defineAvailabilityModel} = require('./models/availability');
 
-const Application = defineApplicationModel(sequelize); // Defines the Application model
+// Define all models
+const Application = defineApplicationModel(sequelize);
+const Person = definePersonModel(sequelize);
+const Competence = defineCompetenceModel(sequelize);
+const CompetenceProfile = defineCompetenceProfileModel(sequelize);
+const Availability = defineAvailabilityModel(sequelize);
+
+// Define relationships
+Application.belongsTo(Person, { foreignKey: 'person_id', as: 'person' });
+Person.hasMany(Application, { foreignKey: 'person_id', as: 'applications' });
+
+CompetenceProfile.belongsTo(Person, { foreignKey: 'person_id', as: 'person' });
+CompetenceProfile.belongsTo(Competence, { foreignKey: 'competence_id', as: 'competence' });
+Person.hasMany(CompetenceProfile, { foreignKey: 'person_id', as: 'competenceProfiles' });
+Competence.hasMany(CompetenceProfile, { foreignKey: 'competence_id', as: 'competenceProfiles' });
+
+Availability.belongsTo(Person, { foreignKey: 'person_id', as: 'person' });
+Person.hasMany(Availability, { foreignKey: 'person_id', as: 'availabilities' });
 
 /*
 * Database is initialized and synched with the defined models. 
@@ -11,6 +32,15 @@ const Application = defineApplicationModel(sequelize); // Defines the Applicatio
 
 async function initDb() {
     await sequelize.authenticate();
+    await sequelize.sync({ alter: true });
 }
 
-module.exports = { sequelize, Application, initDb };
+module.exports = { 
+    sequelize, 
+    Application, 
+    Person,
+    Competence,
+    CompetenceProfile,
+    Availability,
+    initDb 
+};
