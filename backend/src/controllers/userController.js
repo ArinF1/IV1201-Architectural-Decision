@@ -156,37 +156,4 @@ exports.login = async (req, res, next) => {
     } catch (error) {
         next(error);
     }
-/**
- * Login user
- * @param {express.Request} req - Express request object
- * @param {express.Response} res - Express response object
- * @param {express.NextFunction} next - Express next middleware function
- * @returns {Promise<void>}
- */
-exports.loginUser = async (req, res, next) => {
-  try {
-    const { username, password } = req.body;
-
-    if (!username || !password) {
-      const error = new Error('Username and password required');
-      error.status = 400;
-      throw error;
-    }
-
-    const user = await userService.loginUser(username, password);
-
-    const userResponse = new UserDTO(
-      user.person_id,
-      user.name,
-      user.surname,
-      user.pnr,
-      user.email,
-      user.username,
-      user.role_id
-    );
-
-    res.status(200).json({ success: true, user: userResponse });
-  } catch (error) {
-    next(error);
-  }
 };
