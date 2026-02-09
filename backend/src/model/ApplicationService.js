@@ -1,4 +1,5 @@
 const applicationRepo = require('../integration/repositories/applicationRepo');
+const ApplicationDTO = require('./ApplicationDTO');
 
 const { sequelize } = require('../integration/persistance');
 
@@ -49,6 +50,7 @@ class ApplicationService {
 
             const result = await applicationRepo.createApplication(applicationData, t);
             return result;
+            return await applicationRepo.createApplication(text, t);
         });
     }
 
@@ -61,7 +63,9 @@ class ApplicationService {
         if (!applications) {
             throw new Error("Failed to retrieve applications");
         }
-        return applications;
+        return applications.map(app => 
+            new ApplicationDTO(app.name, app.surname, app.status || 'unhandled')
+        );
     }
 
     /**
@@ -92,6 +96,7 @@ class ApplicationService {
         const result = await applicationRepo.updateApplicationStatus(applicationId, status);
         return result;
     }
+
 }
 
 module.exports = new ApplicationService();

@@ -1,3 +1,7 @@
+const userRepo = require('../integration/repositories/userRepo');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+
 
 class UserService {
     async findAllUsers() {
@@ -9,7 +13,29 @@ class UserService {
     }
 
     async registerUser(data) {
-        return { id: 1, ...data, role_id: 2 };
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(data.password, saltRounds);
+        
+        return await userRepo.createUser({
+            ...data,
+            password: hashedPassword,
+            role_id: 2
+        });
+    }
+
+    async login(username, password) {
+        const user = await userRepo.findUserByUsername(username);
+        if (!user) throw new Error("Invalid credentials");
+
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) throw new Error("Invalid credentials");
+
+        const token = jwt.sign(
+            { id: user.person_id, role: user.role_id },
+            process.env.JWT_SECRET,
+            { expiresIn: '1h' }
+        );
+        return { token, user };
     }
 }
 

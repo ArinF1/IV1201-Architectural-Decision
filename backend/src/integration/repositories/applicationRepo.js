@@ -1,5 +1,7 @@
 const { Application, Person, CompetenceProfile, Competence, Availability } = require("../persistance");
 
+const { Person } = require('../persistance');
+
 /**
  * Creates a new application in the database with the provided data.
  * @param {Object} applicationData - The application data including person_id, competencies, and availabilities.
@@ -118,11 +120,20 @@ async function updateApplicationStatus(applicationId, status) {
     await application.save();
 
     return application.get({ plain: true });
+    return await Person.findAll({
+        where: { role_id: 2 },
+        attributes: ['name', 'surname'], 
+        limit: limit,
+        raw: true
+    });
 }
+
+
 
 module.exports = {
     createApplication,
     listApplications,
     listCompetencies,
     updateApplicationStatus,
+    
 };

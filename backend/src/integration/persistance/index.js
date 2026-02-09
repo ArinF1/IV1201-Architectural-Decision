@@ -4,13 +4,15 @@ const {definePersonModel} = require('../../model/person');
 const {defineCompetenceModel} = require('./models/competence');
 const {defineCompetenceProfileModel} = require('./models/competenceProfile');
 const {defineAvailabilityModel} = require('./models/availability');
+const { definePersonModel } = require('./models/person'); // Import Person definition
 
 // Define all models
 const Application = defineApplicationModel(sequelize);
-const Person = definePersonModel(sequelize);
 const Competence = defineCompetenceModel(sequelize);
 const CompetenceProfile = defineCompetenceProfileModel(sequelize);
 const Availability = defineAvailabilityModel(sequelize);
+const Person = definePersonModel(sequelize); // Defines the Person model
+
 
 // Define relationships
 Application.belongsTo(Person, { foreignKey: 'person_id', as: 'person' });
@@ -23,6 +25,7 @@ Competence.hasMany(CompetenceProfile, { foreignKey: 'competence_id', as: 'compet
 
 Availability.belongsTo(Person, { foreignKey: 'person_id', as: 'person' });
 Person.hasMany(Availability, { foreignKey: 'person_id', as: 'availabilities' });
+
 
 /*
 * Database is initialized and synched with the defined models. 
@@ -44,3 +47,4 @@ module.exports = {
     Availability,
     initDb 
 };
+

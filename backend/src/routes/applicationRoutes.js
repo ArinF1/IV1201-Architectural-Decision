@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const applicationController = require('../controllers/applicationController');
+const { authenticateToken } = require('../middleware/authMiddleware');
 
 // GET /api/applications/competencies - Get all available competencies
 router.get('/competencies', function(req, res, next) {
@@ -21,5 +22,13 @@ router.get('/', function(req, res, next) {
 router.patch('/:id/status', function(req, res, next) {
   return applicationController.updateApplicationStatus(req, res, next);
 });
+//router.post('/', (req, res, next) => applicationController.postApplication(req, res, next));
+
+// GET /api/applications
+//router.get('/', (req, res, next) => applicationController.getApplications(req, res, next));
+
+router.get('/', authenticateToken, applicationController.getApplications);
+
+router.post('/', authenticateToken, applicationController.postApplication);
 
 module.exports = router;
