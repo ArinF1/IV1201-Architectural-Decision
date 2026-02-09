@@ -1,4 +1,4 @@
-const {Application} = require("../persistance"); // Imports the Message model
+const {Application} = require("../persistence"); // Imports the Message model
 
 /**
  * Creates a new application in the database with the provided text.
