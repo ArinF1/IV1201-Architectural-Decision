@@ -1,4 +1,5 @@
 const applicationService = require('../model/ApplicationService');
+const decisionMakingService = require('../model/DecisionMakingService');
 
 /**
  * Handles the creation of a new application.
@@ -71,6 +72,23 @@ exports.updateApplicationStatus = async (req, res, next) => {
         const { id } = req.params;
         const { status } = req.body;
         const result = await applicationService.updateApplicationStatus(parseInt(id), status);
+        res.status(200).json({ success: true, data: result });
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * Processes all unhandled applications with automated decision-making.
+ * 
+ * @param {import('express').Request} req - The Express request object.
+ * @param {import('express').Response} res - The Express response object.
+ * @param {import('express').NextFunction} next - The next middleware function.
+ * @returns {Promise<void>} Sends a 200 OK response with processing results.
+ */
+exports.autoProcessApplications = async (req, res, next) => {
+    try {
+        const result = await decisionMakingService.processUnhandledApplications();
         res.status(200).json({ success: true, data: result });
     } catch (error) {
         next(error);
