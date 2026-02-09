@@ -1,9 +1,8 @@
-const {sequelize} = require('./sequelize'); // Imports config. sequelize instance
-const {defineApplicationModel} = require('./models/application'); // Imports model definitions
-const {definePersonModel} = require('../../model/person');
-const {defineCompetenceModel} = require('./models/competence');
-const {defineCompetenceProfileModel} = require('./models/competenceProfile');
-const {defineAvailabilityModel} = require('./models/availability');
+const { sequelize } = require('./sequelize'); // Imports config. sequelize instance
+const { defineApplicationModel } = require('./models/application'); // Imports model definitions
+const { defineCompetenceModel } = require('./models/competence');
+const { defineCompetenceProfileModel } = require('./models/competenceProfile');
+const { defineAvailabilityModel } = require('./models/availability');
 const { definePersonModel } = require('./models/person'); // Import Person definition
 
 // Define all models
@@ -38,13 +37,13 @@ async function initDb() {
     await sequelize.sync({ alter: true });
 }
 
-module.exports = { 
-    sequelize, 
-    Application, 
+module.exports = {
+    sequelize,
+    Application,
     Person,
     Competence,
     CompetenceProfile,
     Availability,
-    initDb 
+    initDb
 };
 

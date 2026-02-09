@@ -1,7 +1,5 @@
 const { Application, Person, CompetenceProfile, Competence, Availability } = require("../persistance");
 
-const { Person } = require('../persistance');
-
 /**
  * Creates a new application in the database with the provided data.
  * @param {Object} applicationData - The application data including person_id, competencies, and availabilities.
@@ -22,7 +20,7 @@ async function createApplication(applicationData, transaction = null) {
 
     // Create competence profiles
     if (competencies && competencies.length > 0) {
-        const competenceProfiles = competencies.map(function(comp) {
+        const competenceProfiles = competencies.map(function (comp) {
             return {
                 person_id,
                 competence_id: comp.competence_id,
@@ -34,7 +32,7 @@ async function createApplication(applicationData, transaction = null) {
 
     // Create availability records
     if (availabilities && availabilities.length > 0) {
-        const availabilityRecords = availabilities.map(function(avail) {
+        const availabilityRecords = availabilities.map(function (avail) {
             return {
                 person_id,
                 from_date: avail.from_date,
@@ -83,7 +81,7 @@ async function listApplications(limit = 50) {
         limit,
     });
 
-    return applications.map(function(app) {
+    return applications.map(function (app) {
         return app.get({ plain: true });
     });
 }
@@ -98,7 +96,7 @@ async function listCompetencies() {
         order: [['name', 'ASC']],
     });
 
-    return competencies.map(function(comp) {
+    return competencies.map(function (comp) {
         return comp.get({ plain: true });
     });
 }
@@ -111,7 +109,7 @@ async function listCompetencies() {
  */
 async function updateApplicationStatus(applicationId, status) {
     const application = await Application.findByPk(applicationId);
-    
+
     if (!application) {
         throw new Error('Application not found');
     }
@@ -120,12 +118,6 @@ async function updateApplicationStatus(applicationId, status) {
     await application.save();
 
     return application.get({ plain: true });
-    return await Person.findAll({
-        where: { role_id: 2 },
-        attributes: ['name', 'surname'], 
-        limit: limit,
-        raw: true
-    });
 }
 
 
@@ -135,5 +127,5 @@ module.exports = {
     listApplications,
     listCompetencies,
     updateApplicationStatus,
-    
+
 };

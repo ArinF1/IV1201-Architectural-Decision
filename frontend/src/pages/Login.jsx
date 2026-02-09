@@ -27,7 +27,7 @@ function Login() {
 
     try {
       const response = await applicationAPI.loginUser(formData);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
+      localStorage.setItem('user', JSON.stringify(response.data));
       navigate('/');
     } catch (err) {
       setError(t('login.errorMessage') + ': ' + err.message);

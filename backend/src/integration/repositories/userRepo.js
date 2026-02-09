@@ -24,4 +24,21 @@ async function createUser(userData) {
     return await Person.create(userData);
 }
 
-module.exports = { findUserByUsername, createUser };
+/**
+ * Retrieves all users from the database.
+ * @returns {Promise<Array>} Array of user entities.
+ */
+async function findAllUsers() {
+    return await Person.findAll();
+}
+
+/**
+ * Retrieves a single user by their primary key.
+ * @param {number} id - The user's ID.
+ * @returns {Promise<Object|null>} The user entity or null if not found.
+ */
+async function findUserById(id) {
+    return await Person.findByPk(id);
+}
+
+module.exports = { findUserByUsername, createUser, findAllUsers, findUserById };
