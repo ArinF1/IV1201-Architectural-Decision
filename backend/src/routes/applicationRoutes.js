@@ -31,4 +31,9 @@ router.get('/', authenticateToken, applicationController.getApplications);
 
 router.post('/', authenticateToken, applicationController.postApplication);
 
+// POST /api/applications/auto-process - Automatically process unhandled applications
+router.post('/auto-process', function(req, res, next) {
+  return applicationController.autoProcessApplications(req, res, next);
+});
+
 module.exports = router;

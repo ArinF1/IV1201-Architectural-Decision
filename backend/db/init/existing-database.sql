@@ -32,7 +32,7 @@ CREATE TABLE public.availability (
 );
 
 
-ALTER TABLE public.availability OWNER TO postgres;
+ALTER TABLE public.availability OWNER TO iv1201;
 
 --
 -- Name: availability_availability_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -58,7 +58,7 @@ CREATE TABLE public.competence (
 );
 
 
-ALTER TABLE public.competence OWNER TO postgres;
+ALTER TABLE public.competence OWNER TO iv1201;
 
 --
 -- Name: competence_competence_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -86,7 +86,7 @@ CREATE TABLE public.competence_profile (
 );
 
 
-ALTER TABLE public.competence_profile OWNER TO postgres;
+ALTER TABLE public.competence_profile OWNER TO iv1201;
 
 --
 -- Name: competence_profile_competence_profile_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -118,7 +118,7 @@ CREATE TABLE public.person (
 );
 
 
-ALTER TABLE public.person OWNER TO postgres;
+ALTER TABLE public.person OWNER TO iv1201;
 
 --
 -- Name: person_person_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -144,7 +144,7 @@ CREATE TABLE public.role (
 );
 
 
-ALTER TABLE public.role OWNER TO postgres;
+ALTER TABLE public.role OWNER TO iv1201;
 
 --
 -- Name: role_role_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -4896,4 +4896,5 @@ ALTER TABLE ONLY public.person
 --
 -- PostgreSQL database dump complete
 --
+
 
