@@ -80,6 +80,32 @@ export const applicationAPI = {
   updateApplicationStatus: function(applicationId, status) {
     return apiClient.patch(`/applications/${applicationId}/status`, { status });
   },
+
+  /**
+   * Register a new user
+   * @param {Object} userData - User registration data
+   * @returns {Promise} Response with created user
+   */
+  registerUser: function(userData) {
+    return apiClient.post('/users', userData);
+  },
+
+  /**
+   * Login user
+   * @param {Object} credentials - Username and password
+   * @returns {Promise} Response with user data
+   */
+  loginUser: function(credentials) {
+    return apiClient.post('/users/login', credentials);
+  },
+
+  /**
+   * Auto-process unhandled applications
+   * @returns {Promise} Response with processing results
+   */
+  autoProcessApplications: function() {
+    return apiClient.post('/applications/auto-process');
+  },
 };
 
 export default apiClient;

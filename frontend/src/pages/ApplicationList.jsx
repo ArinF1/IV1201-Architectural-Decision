@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { applicationAPI } from '../services/api';
 
 function ApplicationList() {
+  const { t } = useTranslation();
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -19,7 +21,7 @@ function ApplicationList() {
       const response = await applicationAPI.getApplications();
       setApplications(response.data.data);
     } catch (err) {
-      setError('Failed to load applications: ' + err.message);
+      setError(t('applicationList.loadingApplications') + ' ' + err.message);
     } finally {
       setLoading(false);
     }
@@ -34,6 +36,20 @@ function ApplicationList() {
       }));
     } catch (err) {
       setError('Failed to update status: ' + err.message);
+    }
+  }
+
+  async function handleAutoProcess() {
+    setLoading(true);
+    setError('');
+    try {
+      const response = await applicationAPI.autoProcessApplications();
+      alert(`Processed ${response.data.data.processed} applications\nAccepted: ${response.data.data.accepted}\nRejected: ${response.data.data.rejected}`);
+      await fetchApplications();
+    } catch (err) {
+      setError('Failed to auto-process: ' + err.message);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -90,19 +106,29 @@ function ApplicationList() {
   return (
     <div className="max-w-7xl mx-auto">
       <div className="flex justify-between items-center mb-8">
-        <h2 className="text-3xl font-semibold text-slate-800">Job Applications</h2>
-        <button 
-          onClick={fetchApplications} 
-          className="bg-blue-500 text-white border-0 px-6 py-3 text-base font-medium rounded-md cursor-pointer transition-colors hover:bg-blue-600" 
-          title="Refresh"
-        >
-          ↻ Refresh
-        </button>
+        <h2 className="text-3xl font-semibold text-slate-800">{t('applicationList.title')}</h2>
+        <div className="flex gap-3">
+          <button 
+            onClick={handleAutoProcess}
+            disabled={loading}
+            className="bg-green-600 text-white border-0 px-6 py-3 text-base font-medium rounded-md cursor-pointer transition-colors hover:bg-green-700 disabled:bg-gray-400" 
+            title="Auto Process"
+          >
+            {t('applicationList.autoProcess')}
+          </button>
+          <button 
+            onClick={fetchApplications} 
+            className="bg-blue-500 text-white border-0 px-6 py-3 text-base font-medium rounded-md cursor-pointer transition-colors hover:bg-blue-600" 
+            title="Refresh"
+          >
+            {t('applicationList.refresh')}
+          </button>
+        </div>
       </div>
 
       {error && (
         <div className="flex items-center gap-3 p-4 mb-6 bg-red-50 text-red-700 border border-red-200 rounded-lg">
-          <span className="text-xl">⚠️</span>
+          <span className="text-xl">{t('common.error')}</span>
           {error}
         </div>
       )}
@@ -111,29 +137,29 @@ function ApplicationList() {
         <>
           <div className="bg-white p-6 rounded-lg shadow-md mb-8 flex gap-8 flex-wrap">
             <div className="flex items-center gap-3">
-              <label className="font-medium text-gray-700 text-sm">Sort by:</label>
+              <label className="font-medium text-gray-700 text-sm">{t('applicationList.sortBy')}</label>
               <select
                 value={sortBy}
                 onChange={function(e) { setSortBy(e.target.value); }}
                 className="px-4 py-2 text-sm border border-gray-300 rounded-md bg-white cursor-pointer min-w-[180px] focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
               >
-                <option value="date">Submission Date</option>
-                <option value="name">Applicant Name</option>
-                <option value="status">Status</option>
+                <option value="date">{t('applicationList.submissionDate')}</option>
+                <option value="name">{t('applicationList.applicantName')}</option>
+                <option value="status">{t('applicationList.status')}</option>
               </select>
             </div>
 
             <div className="flex items-center gap-3">
-              <label className="font-medium text-gray-700 text-sm">Filter:</label>
+              <label className="font-medium text-gray-700 text-sm">{t('applicationList.filter')}</label>
               <select
                 value={filterStatus}
                 onChange={function(e) { setFilterStatus(e.target.value); }}
                 className="px-4 py-2 text-sm border border-gray-300 rounded-md bg-white cursor-pointer min-w-[180px] focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
               >
-                <option value="all">All Applications</option>
-                <option value="unhandled">Unhandled</option>
-                <option value="accepted">Accepted</option>
-                <option value="rejected">Rejected</option>
+                <option value="all">{t('applicationList.allApplications')}</option>
+                <option value="unhandled">{t('applicationList.unhandled')}</option>
+                <option value="accepted">{t('applicationList.accepted')}</option>
+                <option value="rejected">{t('applicationList.rejected')}</option>
               </select>
             </div>
           </div>
@@ -141,11 +167,11 @@ function ApplicationList() {
           {getDisplayApplications().length === 0 ? (
             <div className="bg-white py-16 px-8 rounded-lg shadow-md text-center">
               <p className="text-6xl mb-4">📋</p>
-              <p className="text-xl font-semibold text-slate-800 mb-2">No applications found</p>
+              <p className="text-xl font-semibold text-slate-800 mb-2">{t('applicationList.noApplications')}</p>
               <p className="text-gray-600 text-sm">
                 {filterStatus !== 'all' 
-                  ? 'Try changing the filter' 
-                  : 'Applications will appear here once submitted'}
+                  ? t('applicationList.noApplicationsDesc')
+                  : t('applicationList.noApplicationsDesc')}
               </p>
             </div>
           ) : (
@@ -173,7 +199,7 @@ function ApplicationList() {
                   </div>
 
                   <div className="p-6 border-b border-gray-200">
-                    <h4 className="text-base font-semibold text-gray-700 mb-4">Competence Profile</h4>
+                    <h4 className="text-base font-semibold text-gray-700 mb-4">{t('applicationList.competenceProfile')}</h4>
                     {app.person?.competenceProfiles && app.person.competenceProfiles.length > 0 ? (
                       <ul className="list-none flex flex-col gap-3">
                         {app.person.competenceProfiles.map(function(cp, index) {
@@ -183,7 +209,7 @@ function ApplicationList() {
                               {cp.competence?.name || 'Unknown'}
                             </span>
                             <span className="text-gray-600 text-sm bg-white px-3 py-1 rounded-xl">
-                              {cp.years_of_experience} years
+                              {cp.years_of_experience} {t('applicationList.years')}
                             </span>
                           </li>
                           );
@@ -195,7 +221,7 @@ function ApplicationList() {
                   </div>
 
                   <div className="p-6 border-b border-gray-200">
-                    <h4 className="text-base font-semibold text-gray-700 mb-4">Availability</h4>
+                    <h4 className="text-base font-semibold text-gray-700 mb-4">{t('applicationList.availability')}</h4>
                     {app.person?.availabilities && app.person.availabilities.length > 0 ? (
                       <ul className="list-none flex flex-col gap-3">
                         {app.person.availabilities.map(function(avail, index) {
@@ -219,20 +245,20 @@ function ApplicationList() {
                         onClick={function() { handleStatusUpdate(app.id, 'accepted'); }}
                         className="flex-1 bg-green-600 text-white border-0 px-4 py-2 text-sm font-medium rounded-md cursor-pointer transition-colors hover:bg-green-700"
                       >
-                        Accept
+                        {t('applicationList.accept')}
                       </button>
                       <button
                         onClick={function() { handleStatusUpdate(app.id, 'rejected'); }}
                         className="flex-1 bg-red-600 text-white border-0 px-4 py-2 text-sm font-medium rounded-md cursor-pointer transition-colors hover:bg-red-700"
                       >
-                        Reject
+                        {t('applicationList.reject')}
                       </button>
                     </div>
                   )}
 
                   <div className="px-6 py-4 bg-gray-50">
                     <span className="text-gray-600 text-xs">
-                      Submitted: {formatDate(app.createdAt)}
+                      {t('applicationList.submitted')}: {formatDate(app.createdAt)}
                     </span>
                   </div>
                 </div>

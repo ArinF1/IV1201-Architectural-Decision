@@ -22,4 +22,9 @@ router.patch('/:id/status', function(req, res, next) {
   return applicationController.updateApplicationStatus(req, res, next);
 });
 
+// POST /api/applications/auto-process - Automatically process unhandled applications
+router.post('/auto-process', function(req, res, next) {
+  return applicationController.autoProcessApplications(req, res, next);
+});
+
 module.exports = router;
