@@ -1,7 +1,7 @@
 const applicationRepo = require('../integration/repositories/applicationRepo');
 const ApplicationDTO = require('./ApplicationDTO');
 
-const { sequelize } = require('../integration/persistance');
+const { sequelize } = require('../integration/persistence');
 
 class ApplicationService {
  
@@ -48,9 +48,7 @@ class ApplicationService {
                 }
             }
 
-            const result = await applicationRepo.createApplication(applicationData, t);
-            return result;
-            return await applicationRepo.createApplication(text, t);
+            return await applicationRepo.createApplication(applicationData, t);
         });
     }
 
@@ -64,7 +62,10 @@ class ApplicationService {
             throw new Error("Failed to retrieve applications");
         }
         return applications.map(app => 
-            new ApplicationDTO(app.name, app.surname, app.status || 'unhandled')
+            new ApplicationDTO(
+                app.person?.name, 
+                app.person?.surname,
+                app.status || 'unhandled')
         );
     }
 

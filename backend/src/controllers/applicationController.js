@@ -12,7 +12,8 @@ const decisionMakingService = require('../model/DecisionMakingService');
  */
 exports.postApplication = async (req, res, next) => {
     try {
-        const { person_id, competencies, availabilities } = req.body;
+        const person_id = req.user.id; // If assumed to be authenticated and person_id is in req.user
+        const {  competencies, availabilities } = req.body;
         const result = await applicationService.sendApplication({
             person_id,
             competencies,

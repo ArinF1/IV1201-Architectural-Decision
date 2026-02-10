@@ -1,4 +1,4 @@
-const { Person } = require('../persistence');;
+const { Person } = require('../persistence');
 
 /**
  * Data Access Object (DAO) for User-related database operations.
@@ -26,7 +26,7 @@ async function createUser(userData) {
 }
 
 /**
- * Retrieves all users from the database.
+ * Retrieves all users from the database. 
  * @returns {Promise<Array>} Array of user entities.
  */
 async function findAllUsers() {
@@ -37,7 +37,7 @@ async function findAllUsers() {
 }
 
 /**
- * Retrieves a single user by their primary key.
+ * Retrieves a single user by their unique ID.
  * @param {number} id - The user's ID.
  * @returns {Promise<Object|null>} The user entity or null if not found.
  */

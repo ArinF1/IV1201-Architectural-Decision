@@ -135,8 +135,8 @@ async function createApplication(applicationData, transaction = null) {
 
 module.exports = {
   submitApplication,
-  createApplication, // compatibility
+  createApplication,
   listApplications,
   listCompetencies,
-  updateApplicationStatus,
+  updateApplicationStatus, //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 };
