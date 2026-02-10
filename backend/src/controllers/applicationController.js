@@ -1,5 +1,4 @@
 const applicationService = require('../model/ApplicationService');
-const decisionMakingService = require('../model/DecisionMakingService');
 
 /**
  * Handles the creation of a new application.
@@ -12,7 +11,7 @@ const decisionMakingService = require('../model/DecisionMakingService');
  */
 exports.postApplication = async (req, res, next) => {
     try {
-        const person_id = req.user.id; // If assumed to be authenticated and person_id is in req.user
+        const person_id = req.user.id; // From the JWT authentication token
         const {  competencies, availabilities } = req.body;
         const result = await applicationService.sendApplication({
             person_id,
@@ -55,25 +54,6 @@ exports.getCompetencies = async (req, res, next) => {
     try {
         const competencies = await applicationService.getCompetencies();
         res.status(200).json({ success: true, data: competencies });
-    } catch (error) {
-        next(error);
-    }
-};
-
-/**
- * Updates the status of an application.
- * 
- * @param {import('express').Request} req - The Express request object.
- * @param {import('express').Response} res - The Express response object.
- * @param {import('express').NextFunction} next - The next middleware function.
- * @returns {Promise<void>} Sends a 200 OK response with the updated application.
- */
-exports.updateApplicationStatus = async (req, res, next) => {
-    try {
-        const { id } = req.params;
-        const { status } = req.body;
-        const result = await applicationService.updateApplicationStatus(parseInt(id), status);
-        res.status(200).json({ success: true, data: result });
     } catch (error) {
         next(error);
     }

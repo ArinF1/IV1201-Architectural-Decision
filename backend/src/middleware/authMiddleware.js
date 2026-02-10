@@ -18,7 +18,7 @@ const authenticateToken = (req, res, next) => {
         // Verify the token using JWT_SECRET from .env
         const verified = jwt.verify(token, process.env.JWT_SECRET);
         
-        //Attach user data (person_id, role) to the request object
+        //Attach user data (id = person_id, role) to the request object
         req.user = verified; 
         
         // Move to the next function (the Controller)

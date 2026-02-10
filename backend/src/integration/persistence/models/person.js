@@ -1,7 +1,5 @@
 const { DataTypes } = require('sequelize');
 
-
-
 /**
  * Defines the Person model representing the 'person' table in the database.
  * * This model maps directly to the schema provided in existing-database.sql.

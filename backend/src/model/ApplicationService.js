@@ -48,7 +48,7 @@ class ApplicationService {
                 }
             }
 
-            return await applicationRepo.createApplication(applicationData, t);
+            return applicationRepo.submitApplication(applicationData, t);
         });
     }
 
@@ -79,23 +79,6 @@ class ApplicationService {
             throw new Error("Failed to retrieve competencies");
         }
         return competencies;
-    }
-
-    /**
-     * Updates the status of an application.
-     * @param {number} applicationId - The ID of the application.
-     * @param {string} status - The new status ('accepted' or 'rejected').
-     * @return {Object} The updated application.
-     */
-    async updateApplicationStatus(applicationId, status) {
-        // Validate status
-        const validStatuses = ['accepted', 'rejected'];
-        if (!validStatuses.includes(status)) {
-            throw new Error("Status must be 'accepted' or 'rejected'");
-        }
-
-        const result = await applicationRepo.updateApplicationStatus(applicationId, status);
-        return result;
     }
 
 }

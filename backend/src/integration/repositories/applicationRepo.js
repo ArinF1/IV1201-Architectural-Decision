@@ -1,4 +1,3 @@
-const { application } = require("express");
 const { Person, CompetenceProfile, Competence, Availability } = require("../persistence");
 
 /**
@@ -117,26 +116,8 @@ async function listCompetencies() {
     });
 }
 
-/**
-* FUnction to remove!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- */
-async function updateApplicationStatus(applicationId, status) {
-    throw new Error("remove this shit");
-}
-
-/** 
- * Creates the application by inserting the applicant's competencies and availabilities into the database.
- * @param applicationData - The application data containing person_id, competencies, and availabilities.
- * @param transaction - The database transaction obbject 
- */
-async function createApplication(applicationData, transaction = null) {
-  return submitApplication(applicationData, transaction);
-}
-
 module.exports = {
   submitApplication,
-  createApplication,
   listApplications,
   listCompetencies,
-  updateApplicationStatus, //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 };
