@@ -1,4 +1,4 @@
-const { Person } = require('../persistance');;
+const { Person } = require('../persistence');;
 
 /**
  * Data Access Object (DAO) for User-related database operations.
@@ -21,7 +21,8 @@ async function findUserByUsername(username) {
  * @returns {Promise<Object>} The created user instance.
  */
 async function createUser(userData) {
-    return await Person.create(userData);
+    const createdUser = await Person.create(userData);
+    return createdUser.get({ plain: true });
 }
 
 /**
@@ -29,7 +30,10 @@ async function createUser(userData) {
  * @returns {Promise<Array>} Array of user entities.
  */
 async function findAllUsers() {
-    return await Person.findAll();
+    return await Person.findAll({
+        attributes: ['person_id', 'name', 'surname', 'email', 'role_id', 'username', 'pnr'],
+        raw: true
+    });
 }
 
 /**
@@ -38,7 +42,10 @@ async function findAllUsers() {
  * @returns {Promise<Object|null>} The user entity or null if not found.
  */
 async function findUserById(id) {
-    return await Person.findByPk(id);
+    return await Person.findByPk(id, {
+        attributes: ['person_id', 'name', 'surname', 'email', 'role_id', 'username', 'pnr'],   
+        raw: true
+    });
 }
 
 module.exports = { findUserByUsername, createUser, findAllUsers, findUserById };

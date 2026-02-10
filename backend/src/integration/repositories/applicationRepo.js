@@ -1,7 +1,8 @@
-const { Application, Person, CompetenceProfile, Competence, Availability } = require("../persistance");
+const { application } = require("express");
+const { Person, CompetenceProfile, Competence, Availability } = require("../persistence");
 
 /**
- * Creates a new application in the database with the provided data.
+ * Submits a new applicant via an application record associated with their competencies and availabilities.
  * @param {Object} applicationData - The application data including person_id, competencies, and availabilities.
  * @param {number} applicationData.person_id - The ID of the person submitting the application.
  * @param {Array} applicationData.competencies - Array of competence objects with competence_id and years_of_experience.
@@ -9,81 +10,96 @@ const { Application, Person, CompetenceProfile, Competence, Availability } = req
  * @param {Object} transaction - The database transaction object.
  * @return {Object} The created application instance with related data.
  */
-async function createApplication(applicationData, transaction = null) {
+async function submitApplication(applicationData, transaction = null) {
     const { person_id, competencies, availabilities } = applicationData;
 
-    // Create the application record
-    const application = await Application.create(
-        { person_id, status: 'unhandled' },
-        { transaction }
-    );
+    // Validate persons existence
+    const person = await Person.findByPk(person_id, { transaction });
+    if (!person) {
+        throw new Error("Person not found");
+    }
 
-    // Create competence profiles
+    // Insertion of competence profiles
+    let insertedCompetenceProfiles = [];
     if (competencies && competencies.length > 0) {
-        const competenceProfiles = competencies.map(function (comp) {
-            return {
-                person_id,
-                competence_id: comp.competence_id,
-                years_of_experience: comp.years_of_experience,
-            };
-        });
-        await CompetenceProfile.bulkCreate(competenceProfiles, { transaction });
+        const competenceProfilesRows = competencies.map((comp) => ({
+            person_id,
+            competence_id: comp.competence_id,
+            years_of_experience: comp.years_of_experience, 
+        }));
+
+        const createdCompetenceProfiles = await CompetenceProfile.bulkCreate(competenceProfilesRows, {
+            transaction,
+            returning: true,
+        }); 
+
+        insertedCompetenceProfiles = createdCompetenceProfiles.map((row) => row.get({ plain: true }));
     }
 
-    // Create availability records
+    // Insertion of availability records
+    let insertedAvailabilities = [];
     if (availabilities && availabilities.length > 0) {
-        const availabilityRecords = availabilities.map(function (avail) {
-            return {
-                person_id,
-                from_date: avail.from_date,
-                to_date: avail.to_date,
-            };
+        const availabilityRows = availabilities.map((avail) => ({
+            person_id,
+            from_date: avail.from_date,
+            to_date: avail.to_date,
+        }));
+
+        const createdAvailabilities = await Availability.bulkCreate(availabilityRows, {
+            transaction,
+            returning: true,
         });
-        await Availability.bulkCreate(availabilityRecords, { transaction });
+
+        insertedAvailabilities = createdAvailabilities.map((row) => row.get({ plain: true }));
     }
 
-    return application.get({ plain: true });
+    return {
+        person_id,
+        competenceProfiles: insertedCompetenceProfiles,
+        availabilities: insertedAvailabilities,
+    };
 }
 
 /**
- * Lists applications from the database with related person, competence, and availability data.
+ * Lists applicants from the database via applicantdata through their competence and availability data.
  * @param {number} limit - The maximum number of applications to retrieve (default: 50).
  * @return {Array} An array of application instances with related data.
  */
 async function listApplications(limit = 50) {
-    const applications = await Application.findAll({
+    const persons = await Person.findAll({
+    where: { role_id: 2 }, // applicants are role_id = 2 (from the database, 1 = Recruiter)
+    attributes: ["person_id", "name", "surname", "email", "pnr"],
+    include: [
+      {
+        model: CompetenceProfile,
+        as: "competenceProfiles",
+        attributes: ["competence_profile_id", "competence_id", "years_of_experience"],
         include: [
-            {
-                model: Person,
-                as: 'person',
-                attributes: ['person_id', 'name', 'surname', 'email', 'pnr'],
-                include: [
-                    {
-                        model: CompetenceProfile,
-                        as: 'competenceProfiles',
-                        include: [
-                            {
-                                model: Competence,
-                                as: 'competence',
-                                attributes: ['competence_id', 'name'],
-                            },
-                        ],
-                    },
-                    {
-                        model: Availability,
-                        as: 'availabilities',
-                        attributes: ['availability_id', 'from_date', 'to_date'],
-                    },
-                ],
-            },
+          {
+            model: Competence,
+            as: "competence",
+            attributes: ["competence_id", "name"],
+          },
         ],
-        order: [['createdAt', 'DESC']],
-        limit,
-    });
+      },
+      {
+        model: Availability,
+        as: "availabilities",
+        attributes: ["availability_id", "from_date", "to_date"],
+      },
+    ],
+    limit,
+    order: [["person_id", "DESC"]],
+  });
 
-    return applications.map(function (app) {
-        return app.get({ plain: true });
-    });
+  return persons.map(function (person) {
+    const plain = person.get({ plain: true });
+    return {
+        application_id: plain.person_id,
+        person: plain,
+        status: 'unhandled',
+    };
+  });
 }
 
 /**
@@ -102,30 +118,25 @@ async function listCompetencies() {
 }
 
 /**
- * Updates the status of an application.
- * @param {number} applicationId - The ID of the application to update.
- * @param {string} status - The new status ('accepted' or 'rejected').
- * @return {Object} The updated application instance.
+* FUnction to remove!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  */
 async function updateApplicationStatus(applicationId, status) {
-    const application = await Application.findByPk(applicationId);
-
-    if (!application) {
-        throw new Error('Application not found');
-    }
-
-    application.status = status;
-    await application.save();
-
-    return application.get({ plain: true });
+    throw new Error("remove this shit");
 }
 
-
+/** 
+ * Creates the application by inserting the applicant's competencies and availabilities into the database.
+ * @param applicationData - The application data containing person_id, competencies, and availabilities.
+ * @param transaction - The database transaction obbject 
+ */
+async function createApplication(applicationData, transaction = null) {
+  return submitApplication(applicationData, transaction);
+}
 
 module.exports = {
-    createApplication,
-    listApplications,
-    listCompetencies,
-    updateApplicationStatus,
-
+  submitApplication,
+  createApplication, // compatibility
+  listApplications,
+  listCompetencies,
+  updateApplicationStatus,
 };
