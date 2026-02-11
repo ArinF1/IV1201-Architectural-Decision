@@ -2,6 +2,7 @@
  * @fileoverview Express application configuration
  * @module app
  */
+const path = require('path');
 const { errorHandler } = require('./middleware/errorHandler');
 
 const cookieParser = require('cookie-parser');
@@ -27,9 +28,13 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/users', userRoutes);
 app.use('/api/applications', applicationRoutes);
 
-app.use(express.json());
-
-
+// In production, serve the React frontend as static files
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../../frontend/dist')));
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../../frontend/dist/index.html'));
+  });
+}
 
 app.use(errorHandler);
 /**

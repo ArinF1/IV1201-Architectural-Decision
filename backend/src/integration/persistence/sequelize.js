@@ -8,14 +8,24 @@ const { Sequelize } = require('sequelize');  // Imports sequelize library
 function createSequelizeInstance() {
     const databaseURL = process.env.DATABASE_URL;
     if (!databaseURL) {
-        throw new Error("DATABASE_URL is not set in environment variables"); 
+        throw new Error("DATABASE_URL is not set in environment variables");
     }
 
+    const isProduction = process.env.NODE_ENV === 'production';
+
     return new Sequelize(databaseURL, {
-        logging: false, 
+        logging: false,
+        ...(isProduction && {
+            dialectOptions: {
+                ssl: {
+                    require: true,
+                    rejectUnauthorized: false,
+                },
+            },
+        }),
     });
 }
 
 const sequelize = createSequelizeInstance();
 
-module.exports = {sequelize}; // Export the sequelize instance for use in other parts of the application
+module.exports = { sequelize }; // Export the sequelize instance for use in other parts of the application
