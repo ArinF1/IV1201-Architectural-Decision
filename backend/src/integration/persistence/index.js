@@ -1,0 +1,47 @@
+const { sequelize } = require('./sequelize'); // Imports config. sequelize instance
+const { defineCompetenceModel } = require('./models/competence');
+const { defineCompetenceProfileModel } = require('./models/competenceProfile');
+const { defineAvailabilityModel } = require('./models/availability');
+const { definePersonModel } = require('./models/person'); 
+const { defineRoleModel } = require('./models/role');   
+
+// Define all models
+const Competence = defineCompetenceModel(sequelize);
+const CompetenceProfile = defineCompetenceProfileModel(sequelize);
+const Availability = defineAvailabilityModel(sequelize);
+const Role = defineRoleModel(sequelize);
+const Person = definePersonModel(sequelize); 
+
+// Define relationships
+CompetenceProfile.belongsTo(Person, { foreignKey: 'person_id', as: 'person' });
+CompetenceProfile.belongsTo(Competence, { foreignKey: 'competence_id', as: 'competence' });
+Availability.belongsTo(Person, { foreignKey: 'person_id', as: 'person' });
+Person.belongsTo(Role, { foreignKey: 'role_id', as: 'role' });
+
+Competence.hasMany(CompetenceProfile, { foreignKey: 'competence_id', as: 'competenceProfiles' });
+Role.hasMany(Person, { foreignKey: 'role_id', as: 'persons' });
+
+Person.hasMany(CompetenceProfile, { foreignKey: 'person_id', as: 'competenceProfiles' });
+Person.hasMany(Availability, { foreignKey: 'person_id', as: 'availabilities' });
+
+
+/*
+* Database is initialized and synched with the defined models. 
+* The function is for external use to set up the database connection and ensure models are in sync.
+* authenticate verifies the connection to the database.
+*/
+
+async function initDb() {
+    await sequelize.authenticate();
+}
+
+module.exports = {
+    sequelize,
+    Person,
+    Role,
+    Competence,
+    CompetenceProfile,
+    Availability,
+    initDb
+};
+
