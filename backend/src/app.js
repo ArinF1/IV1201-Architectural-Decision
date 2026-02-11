@@ -30,9 +30,17 @@ app.use('/api/applications', applicationRoutes);
 
 // In production, serve the React frontend as static files
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../../frontend/dist')));
-  app.get('/*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../../frontend/dist/index.html'));
+  const staticPath = path.join(__dirname, '../../frontend/dist');
+  app.use(express.static(staticPath));
+
+  // Fallback to index.html for client-side routing (must be after API routes)
+  app.use((req, res, next) => {
+    // Only serve index.html for non-API routes
+    if (!req.path.startsWith('/api')) {
+      res.sendFile(path.join(staticPath, 'index.html'));
+    } else {
+      next();
+    }
   });
 }
 
