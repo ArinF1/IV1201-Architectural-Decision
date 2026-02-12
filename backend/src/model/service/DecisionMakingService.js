@@ -1,4 +1,4 @@
-const applicationRepo = require('../integration/repositories/applicationRepo');
+const applicationRepo = require('../../integration/repositories/applicationRepo');
 
 /**
  * Automated decision-making service for applications

@@ -1,9 +1,9 @@
 const { sequelize } = require('./sequelize'); // Imports config. sequelize instance
-const { defineCompetenceModel } = require('./models/competence');
-const { defineCompetenceProfileModel } = require('./models/competenceProfile');
-const { defineAvailabilityModel } = require('./models/availability');
-const { definePersonModel } = require('./models/person'); 
-const { defineRoleModel } = require('./models/role');   
+const { defineCompetenceModel } = require('./tables/competence');
+const { defineCompetenceProfileModel } = require('./tables/competenceProfile');
+const { defineAvailabilityModel } = require('./tables/availability');
+const { definePersonModel } = require('./tables/person'); 
+const { defineRoleModel } = require('./tables/role');   
 
 // Define all models
 const Competence = defineCompetenceModel(sequelize);

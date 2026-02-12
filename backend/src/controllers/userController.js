@@ -11,7 +11,7 @@
  * @returns {Promise<void>}
  */
 const userService = require('../model/UserService.js'); 
-const UserDTO = require('../model/userDTO');
+const UserDTO = require('../model/DTO/userDTO.js');
 
 exports.getAllUsers = async (req, res, next) => {
   try {
