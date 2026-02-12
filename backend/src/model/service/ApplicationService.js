@@ -1,5 +1,5 @@
 const applicationRepo = require('../../integration/repositories/applicationRepo');
-const ApplicationDTO = require('./ApplicationDTO');
+const ApplicationDTO = require('../DTO/ApplicationDTO');
 
 const { sequelize } = require('../../integration/persistence');
 

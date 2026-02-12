@@ -1,4 +1,5 @@
-const applicationService = require('../model/ApplicationService');
+const applicationService = require('../model/service/ApplicationService');
+const decisionMakingService = require('../model/service/DecisionMakingService');
 
 /**
  * Handles the creation of a new application.

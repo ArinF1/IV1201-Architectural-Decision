@@ -10,7 +10,7 @@
  * @param {express.NextFunction} next - Express next middleware function
  * @returns {Promise<void>}
  */
-const userService = require('../model/UserService.js'); 
+const userService = require('../model/service/UserService'); 
 const UserDTO = require('../model/DTO/userDTO.js');
 
 exports.getAllUsers = async (req, res, next) => {

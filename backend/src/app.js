@@ -6,11 +6,11 @@ const { errorHandler } = require('./middleware/errorHandler');
 
 const cookieParser = require('cookie-parser');
 
-const applicationRoutes = require('./routes/applicationRoutes');
+const applicationRoutes = require('./view/routes/applicationRoutes');
 
 const express = require('express');
 const cors = require('cors');
-const userRoutes = require('./routes/userRoutes');
+const userRoutes = require('./view/routes/userRoutes');
 
 const app = express();
 

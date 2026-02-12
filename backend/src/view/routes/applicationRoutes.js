@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const applicationController = require('../controllers/applicationController');
-const { authenticateToken } = require('../middleware/authMiddleware');
+
+const applicationController = require('../../controllers/applicationController');
+const { authenticateToken } = require('../../middleware/authMiddleware');
 
 // GET /api/applications/competencies - get list of competencies for application form
 router.get('/competencies', applicationController.getCompetencies);
@@ -14,7 +15,5 @@ router.get('/', authenticateToken, applicationController.getApplications);
 
 // POST /api/applications/auto-process - trigger auto-processing of applications
 // router.post('/auto-process', authenticateToken, applicationController.autoProcessApplications);
-
-// router.patch('/:id/status', authenticateToken, applicationController.updateApplicationStatus); //!!!!!!!!!!!!!!!!!!
 
 module.exports = router;
