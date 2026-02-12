@@ -1,6 +1,11 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+// Auto-detect production: if running on Heroku, use relative path (same origin)
+// In development, use VITE_API_URL or localhost
+const isProduction = window.location.hostname.includes('herokuapp.com');
+const API_BASE_URL = isProduction
+  ? '/api'
+  : (import.meta.env.VITE_API_URL || 'http://localhost:3000/api');
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -12,7 +17,7 @@ const apiClient = axios.create({
 
 // Request interceptor for adding auth tokens if needed
 apiClient.interceptors.request.use(
-  function(config) {
+  function (config) {
     // Add auth token if available
     const token = localStorage.getItem('authToken');
     if (token) {
@@ -20,17 +25,17 @@ apiClient.interceptors.request.use(
     }
     return config;
   },
-  function(error) {
+  function (error) {
     return Promise.reject(error);
   }
 );
 
 // Response interceptor for handling errors
 apiClient.interceptors.response.use(
-  function(response) {
+  function (response) {
     return response;
   },
-  function(error) {
+  function (error) {
     if (error.response) {
       // Server responded with error status
       const message = error.response.data?.message || 'An error occurred';
@@ -51,7 +56,7 @@ export const applicationAPI = {
    * @param {Object} applicationData - The application data
    * @returns {Promise} Response with created application
    */
-  submitApplication: function(applicationData) {
+  submitApplication: function (applicationData) {
     return apiClient.post('/applications', applicationData);
   },
 
@@ -59,7 +64,7 @@ export const applicationAPI = {
    * Get all applications
    * @returns {Promise} Response with list of applications
    */
-  getApplications: function() {
+  getApplications: function () {
     return apiClient.get('/applications');
   },
 
@@ -67,7 +72,7 @@ export const applicationAPI = {
    * Get all available competencies
    * @returns {Promise} Response with list of competencies
    */
-  getCompetencies: function() {
+  getCompetencies: function () {
     return apiClient.get('/applications/competencies');
   },
 
@@ -77,7 +82,7 @@ export const applicationAPI = {
    * @param {string} status - The new status ('accepted' or 'rejected')
    * @returns {Promise} Response with updated application
    */
-  updateApplicationStatus: function(applicationId, status) {
+  updateApplicationStatus: function (applicationId, status) {
     return apiClient.patch(`/applications/${applicationId}/status`, { status });
   },
 
@@ -86,7 +91,7 @@ export const applicationAPI = {
    * @param {Object} userData - User registration data
    * @returns {Promise} Response with created user
    */
-  registerUser: function(userData) {
+  registerUser: function (userData) {
     return apiClient.post('/users', userData);
   },
 
@@ -95,7 +100,7 @@ export const applicationAPI = {
    * @param {Object} credentials - Username and password
    * @returns {Promise} Response with user data
    */
-  loginUser: function(credentials) {
+  loginUser: function (credentials) {
     return apiClient.post('/users/login', credentials);
   },
 
@@ -103,7 +108,7 @@ export const applicationAPI = {
    * Auto-process unhandled applications
    * @returns {Promise} Response with processing results
    */
-  autoProcessApplications: function() {
+  autoProcessApplications: function () {
     return apiClient.post('/applications/auto-process');
   },
 };

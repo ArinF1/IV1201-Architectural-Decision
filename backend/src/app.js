@@ -2,6 +2,7 @@
  * @fileoverview Express application configuration
  * @module app
  */
+const path = require('path');
 const { errorHandler } = require('./middleware/errorHandler');
 
 const cookieParser = require('cookie-parser');
@@ -27,9 +28,21 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/users', userRoutes);
 app.use('/api/applications', applicationRoutes);
 
-app.use(express.json());
+// In production, serve the React frontend as static files
+if (process.env.NODE_ENV === 'production') {
+  const staticPath = path.join(__dirname, '../../frontend/dist');
+  app.use(express.static(staticPath));
 
-
+  // Fallback to index.html for client-side routing (must be after API routes)
+  app.use((req, res, next) => {
+    // Only serve index.html for non-API routes
+    if (!req.path.startsWith('/api')) {
+      res.sendFile(path.join(staticPath, 'index.html'));
+    } else {
+      next();
+    }
+  });
+}
 
 app.use(errorHandler);
 /**
