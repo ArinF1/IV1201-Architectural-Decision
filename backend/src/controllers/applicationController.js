@@ -12,14 +12,20 @@ const decisionMakingService = require('../model/service/DecisionMakingService');
  */
 exports.postApplication = async (req, res, next) => {
     try {
-        const person_id = req.user.id; // From the JWT authentication token
-        const {  competencies, availabilities } = req.body;
+        if (!req.user || !req.user.id) {
+            throw new HttpError(401, 'Unauthorized', 'UNAUTHORIZED');
+        }
+
+        const person_id = req.user.id;
+        const competencies = req.body.competencies;
+        const availabilities = req.body.availabilities;
+
         const result = await applicationService.sendApplication({
-            person_id,
-            competencies,
-            availabilities,
+            person_id: person_id,
+            competencies: competencies,
+            availabilities: availabilities,
         });
-        
+
         res.status(201).json({ success: true, data: result });
     } catch (error) {
         next(error);

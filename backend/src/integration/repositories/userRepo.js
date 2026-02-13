@@ -1,4 +1,5 @@
 const { Person } = require('../persistence');
+const { HttpError } = require('../../errors/HttpsError');
 
 /**
  * Data Access Object (DAO) for User-related database operations.
@@ -20,9 +21,13 @@ async function findUserByUsername(username) {
  * * @param {Object} userData - The user data to be created (password must be hashed).
  * @returns {Promise<Object>} The created user instance.
  */
-async function createUser(userData) {
-    const createdUser = await Person.create(userData);
-    return createdUser.get({ plain: true });
+async function createUser(userData, transaction) {
+  if (!transaction) {
+    throw new HttpError(500, "DB transaction is required for creating a user", "INTERNAL_SERVER_ERROR");
+  }
+
+  const createdUser = await Person.create(userData, { transaction: transaction });
+  return createdUser.get({ plain: true });
 }
 
 /**
