@@ -12,7 +12,8 @@ function Registration() {
     pnr: '',
     email: '',
     username: '',
-    password: ''
+    password: '',
+    recruiter_code: ''
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -108,6 +109,18 @@ function Registration() {
             onChange={handleChange}
             required
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+          />
+        </div>
+
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-700 mb-2">Rekryterarkod (valfritt)</label>
+          <input
+            type="text"
+            name="recruiter_code"
+            value={formData.recruiter_code}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+            autoComplete="off"
           />
         </div>
 

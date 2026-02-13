@@ -11,7 +11,13 @@ const { Person } = require('../persistence');
  * @returns {Promise<Object|null>} The raw user entity or null if not found.
  */
 async function findUserByUsername(username) {
-    return await Person.findOne({ where: { username }, raw: true });
+    const { Person, Role } = require('../persistence');
+    return await Person.findOne({
+        where: { username },
+        include: [{ model: Role, as: 'role', attributes: ['name'] }],
+        raw: true,
+        nest: true
+    });
 }
 
 

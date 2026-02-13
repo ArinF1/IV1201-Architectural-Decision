@@ -32,11 +32,15 @@ class UserService {
     async registerUser(data) {
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(data.password, saltRounds);
-
+        const recruiterCode = process.env.RECRUITER_SECRET_CODE;
+        let roleId = 2;
+        if (data.recruiter_code && recruiterCode && data.recruiter_code === recruiterCode) {
+            roleId = 1;
+        }
         return await userRepo.createUser({
             ...data,
             password: hashedPassword,
-            role_id: 2
+            role_id: roleId
         });
     }
 
@@ -62,12 +66,15 @@ class UserService {
             throw error;
         }
 
+        // user.role.name will be 'recruiter' or 'applicant'
+        const roleName = user.role && user.role.name ? user.role.name : (user.role_id === 1 ? 'recruiter' : 'applicant');
         const token = jwt.sign(
-            { id: user.person_id, role: user.role_id },
+            { id: user.person_id, role: roleName },
             process.env.JWT_SECRET,
             { expiresIn: '1h' }
         );
-        return { token, user };
+        // Return role as string in user-objektet också
+        return { token, user: { ...user, role: roleName } };
     }
 }
 

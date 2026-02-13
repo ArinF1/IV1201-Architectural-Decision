@@ -63,37 +63,37 @@ exports.getUserById = async (req, res, next) => {
  */
 exports.createUser = async (req, res, next) => {
     try {
-        const { name, surname, pnr, email, password, username } = req.body;
+      const { name, surname, pnr, email, password, username, recruiter_code } = req.body;
 
-        // Validation for missing fields
-        if (!username || !password || !email) {
-            const error = new Error('Missing required registration fields');
-            error.status = 400;
-            throw error;
-        }
+      // Validation for missing fields
+      if (!username || !password || !email) {
+        const error = new Error('Missing required registration fields');
+        error.status = 400;
+        throw error;
+      }
 
-        // Call to model/service layer
-        const user = await userService.registerUser({ 
-            name, surname, pnr, email, password, username 
-        });
+      // Call to model/service layer, pass recruiter_code
+      const user = await userService.registerUser({ 
+        name, surname, pnr, email, password, username, recruiter_code
+      });
 
-        // We wrap the result in a DTO before sending it to the View.
-        const userResponse = new UserDTO(
-            user.person_id,
-            user.name,
-            user.surname,
-            user.pnr,
-            user.email,
-            user.username,
-            user.role_id // Role ID mapping
-        );
+      // We wrap the result in a DTO before sending it to the View.
+      const userResponse = new UserDTO(
+        user.person_id,
+        user.name,
+        user.surname,
+        user.pnr,
+        user.email,
+        user.username,
+        user.role_id // Role ID mapping
+      );
 
-        res.status(201).json(userResponse);
+      res.status(201).json(userResponse);
     } catch (error) {
-        // Passes error to the centralized handler in app.js
-        next(error);
+      // Passes error to the centralized handler in app.js
+      next(error);
     }
-};
+  };
 
 /**
  * Update an existing user
@@ -143,15 +143,23 @@ exports.login = async (req, res, next) => {
         const { username, password } = req.body;
         const { token, user } = await userService.login(username, password);
 
-        
         res.cookie('auth_token', token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-            maxAge: 3600000 
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'strict',
+          maxAge: 3600000 
         });
 
-        const userResponse = new UserDTO(user.person_id, user.name, user.surname, user.pnr, user.email, user.username, user.role_id);
+        // Skicka med rollnamn i svaret
+        const userResponse = {
+          id: user.person_id,
+          name: user.name,
+          surname: user.surname,
+          pnr: user.pnr,
+          email: user.email,
+          username: user.username,
+          role: user.role // "recruiter" eller "applicant"
+        };
         res.status(200).json(userResponse);
     } catch (error) {
         next(error);

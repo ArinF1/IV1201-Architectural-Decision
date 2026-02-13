@@ -106,6 +106,14 @@ export const applicationAPI = {
   autoProcessApplications: function() {
     return apiClient.post('/applications/auto-process');
   },
+
+  /**
+   * Get all applications for recruiter
+   * @returns {Promise} Response with list of applications (fullName, status)
+   */
+  getAllApplicationsRecruiter: function() {
+    return apiClient.get('/applications/list');
+  },
 };
 
 export default apiClient;

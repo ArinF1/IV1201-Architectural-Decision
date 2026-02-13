@@ -12,6 +12,9 @@ router.post('/', authenticateToken, applicationController.postApplication);
 // GET /api/applications - get list of recent applications with details
 router.get('/', authenticateToken, applicationController.getApplications);
 
+// GET /api/applications/list - recruiter-only list of all applications (full name + status)
+router.get('/list', authenticateToken, applicationController.listAllApplications);
+
 // POST /api/applications/auto-process - trigger auto-processing of applications
 // router.post('/auto-process', authenticateToken, applicationController.autoProcessApplications);
 
