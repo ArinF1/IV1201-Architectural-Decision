@@ -14,7 +14,7 @@ function createSequelizeInstance() {
     const isProduction = process.env.NODE_ENV === 'production';
 
     return new Sequelize(databaseURL, {
-        logging: false,
+        logging: console.log,
         ...(isProduction && {
             dialectOptions: {
                 ssl: {
