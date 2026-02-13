@@ -119,6 +119,14 @@ export const applicationAPI = {
   logoutUser: function () {
     return apiClient.post('/users/logout');
   },
+
+  /**
+   * Get all applications for recruiter
+   * @returns {Promise} Response with list of applications (fullName, status)
+   */
+  getAllApplicationsRecruiter: function () {
+    return apiClient.get('/applications/list');
+  },
 };
 
 export default apiClient;

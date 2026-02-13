@@ -80,6 +80,28 @@ class ApplicationService {
     }
 
     /**
+     * Retrieves all applications (for recruiters) with applicant full name and status.
+     * @returns {Array<{fullName: string, status: string}>}
+     */
+    async listAllApplications() {
+        // use a large limit to return all for now
+        const applications = await applicationRepo.listApplications(1000);
+        if (!applications) {
+            throw new Error("Failed to retrieve applications");
+        }
+
+        return applications.map(function(app) {
+            const person = app.person || {};
+            const first = person.name || '';
+            const last = person.surname || '';
+            return {
+                fullName: `${first} ${last}`.trim(),
+                status: app.status || 'unhandled'
+            };
+        });
+    }
+
+    /**
      * Gets all available competencies.
      * @return {Array} Array of competence objects.
      */

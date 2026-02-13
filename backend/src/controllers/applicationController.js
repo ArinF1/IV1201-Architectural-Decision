@@ -50,6 +50,26 @@ exports.getApplications = async (req, res, next) => {
 };
 
 /**
+ * Lists all applications for recruiters.
+ */
+exports.listAllApplications = async (req, res, next) => {
+    try {
+        // Check recruiter role (role 1 = recruiter)
+        const userRole = req.user && req.user.role;
+        if (userRole !== 1) {
+            const error = new Error('Forbidden');
+            error.status = 403;
+            return next(error);
+        }
+
+        const list = await applicationService.listAllApplications();
+        res.status(200).json({ success: true, data: list });
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
  * Retrieves all available competencies.
  * 
  * @param {import('express').Request} req - The Express request object.

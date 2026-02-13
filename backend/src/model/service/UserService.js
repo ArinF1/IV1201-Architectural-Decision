@@ -38,14 +38,21 @@ class UserService {
 
 
         const saltRounds = 10;
-        
-        return sequelize.transaction(async function (transaction) {
-        const hashedPassword = await bcrypt.hash(data.password, saltRounds);
 
-        return await userRepo.createUser({
-            ...data,
-            password: hashedPassword,
-            role_id: 2 }, transaction);
+        return sequelize.transaction(async function (transaction) {
+            const hashedPassword = await bcrypt.hash(data.password, saltRounds);
+            const recruiterCode = process.env.RECRUITER_SECRET_CODE;
+            let roleId = 2;
+            if (data.recruiter_code && recruiterCode && data.recruiter_code === recruiterCode) {
+                roleId = 1;
+            }
+            // Remove recruiter_code from data before saving — it's not a DB column
+            const { recruiter_code, ...userData } = data;
+            return await userRepo.createUser({
+                ...userData,
+                password: hashedPassword,
+                role_id: roleId
+            }, transaction);
         });
     }
 
@@ -67,12 +74,15 @@ class UserService {
             throw new HttpError(401, "Invalid credentials", "UNAUTHORIZED");
         }
 
+        // user.role.name will be 'recruiter' or 'applicant'
+        const roleName = user.role && user.role.name ? user.role.name : (user.role_id === 1 ? 'recruiter' : 'applicant');
         const token = jwt.sign(
-            { id: user.person_id, role: user.role_id },
+            { id: user.person_id, role: roleName },
             process.env.JWT_SECRET,
             { expiresIn: '1h' }
         );
-        return { token, user };
+        // Return role as string in user-objektet också
+        return { token, user: { ...user, role: roleName } };
     }
 }
 

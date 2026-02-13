@@ -35,7 +35,12 @@ function Login() {
     try {
       const response = await applicationAPI.loginUser(formData);
       login(response.data);
-      navigate('/');
+      localStorage.setItem('user', JSON.stringify(response.data));
+      if (response.data.role === 'recruiter') {
+        navigate('/recruiter');
+      } else {
+        navigate('/');
+      }
     } catch (err) {
       setError(t('login.errorMessage') + ': ' + err.message);
     } finally {

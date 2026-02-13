@@ -63,7 +63,7 @@ exports.getUserById = async (req, res, next) => {
  */
 exports.createUser = async (req, res, next) => {
   try {
-    const { name, surname, pnr, email, password, username } = req.body;
+    const { name, surname, pnr, email, password, username, recruiter_code } = req.body;
 
     // Validation for missing fields
     if (!username || !password || !email) {
@@ -72,9 +72,9 @@ exports.createUser = async (req, res, next) => {
       throw error;
     }
 
-    // Call to model/service layer
+    // Call to model/service layer, pass recruiter_code
     const user = await userService.registerUser({
-      name, surname, pnr, email, password, username
+      name, surname, pnr, email, password, username, recruiter_code
     });
 
     // We wrap the result in a DTO before sending it to the View.
@@ -130,19 +130,18 @@ exports.deleteUser = async (req, res, next) => {
 
 /**
  * Handles user authentication.
- * * Extracts credentials from the request body, validates them via the UserService,
+ * Extracts credentials from the request body, validates them via the UserService,
  * and issues a JWT stored in an HTTP-only cookie to mitigate XSS risks.
- * Returns a UserDTO to the View to maintain low coupling.
- * * @param {import('express').Request} req - The Express request object.
+ * Returns user data including role to the View.
+ * @param {import('express').Request} req - The Express request object.
  * @param {import('express').Response} res - The Express response object.
  * @param {import('express').NextFunction} next - The next middleware function for error handling.
- * @returns {Promise<void>} Sends a 200 OK response with UserDTO and sets the auth cookie.
+ * @returns {Promise<void>} Sends a 200 OK response with user data and sets the auth cookie.
  */
 exports.login = async (req, res, next) => {
   try {
     const { username, password } = req.body;
     const { token, user } = await userService.login(username, password);
-
 
     res.cookie('auth_token', token, {
       httpOnly: true,
@@ -151,7 +150,15 @@ exports.login = async (req, res, next) => {
       maxAge: 3600000
     });
 
-    const userResponse = new UserDTO(user.person_id, user.name, user.surname, user.pnr, user.email, user.username, user.role_id);
+    const userResponse = {
+      id: user.person_id,
+      name: user.name,
+      surname: user.surname,
+      pnr: user.pnr,
+      email: user.email,
+      username: user.username,
+      role: user.role
+    };
     res.status(200).json(userResponse);
   } catch (error) {
     next(error);
