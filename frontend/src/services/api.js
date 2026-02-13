@@ -111,6 +111,14 @@ export const applicationAPI = {
   autoProcessApplications: function () {
     return apiClient.post('/applications/auto-process');
   },
+
+  /**
+   * Logout user (clears auth cookie on server)
+   * @returns {Promise} Response confirming logout
+   */
+  logoutUser: function () {
+    return apiClient.post('/users/logout');
+  },
 };
 
 export default apiClient;

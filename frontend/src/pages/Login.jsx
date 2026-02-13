@@ -1,17 +1,24 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { applicationAPI } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 function Login() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { login, isAuthenticated } = useAuth();
   const [formData, setFormData] = useState({
     username: '',
     password: ''
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Already logged in — redirect to home
+  if (isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
 
   function handleChange(e) {
     setFormData({
@@ -27,7 +34,7 @@ function Login() {
 
     try {
       const response = await applicationAPI.loginUser(formData);
-      localStorage.setItem('user', JSON.stringify(response.data));
+      login(response.data);
       navigate('/');
     } catch (err) {
       setError(t('login.errorMessage') + ': ' + err.message);

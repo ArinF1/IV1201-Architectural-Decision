@@ -14,7 +14,8 @@ i18n
             submitApplication: 'Submit Application',
             viewApplications: 'View Applications',
             register: 'Register',
-            login: 'Login'
+            login: 'Login',
+            logout: 'Logout'
           },
           applicationSubmission: {
             title: 'Submit Job Application',
@@ -108,7 +109,8 @@ i18n
             submitApplication: 'Skicka ansökan',
             viewApplications: 'Visa ansökningar',
             register: 'Registrera',
-            login: 'Logga in'
+            login: 'Logga in',
+            logout: 'Logga ut'
           },
           applicationSubmission: {
             title: 'Skicka jobbansökan',
