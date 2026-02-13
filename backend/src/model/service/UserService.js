@@ -1,6 +1,8 @@
 const userRepo = require('../../integration/repositories/userRepo');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { sequelize } = require('../../integration/persistence');
+const { HttpError } = require('../../errors/HttpsError');
 
 /**
  * Application Layer service for user-related business logic.
@@ -30,13 +32,20 @@ class UserService {
      * @returns {Promise<Object>} The created user entity.
      */
     async registerUser(data) {
+        if (!data || !data.username || !data.password || !data.email) {
+            throw new HttpError(400, "Missing required registration fields", "BAD_REQUEST");
+        }
+
+
         const saltRounds = 10;
+        
+        return sequelize.transaction(async function (transaction) {
         const hashedPassword = await bcrypt.hash(data.password, saltRounds);
 
         return await userRepo.createUser({
             ...data,
             password: hashedPassword,
-            role_id: 2
+            role_id: 2 }, transaction);
         });
     }
 
@@ -50,16 +59,12 @@ class UserService {
     async login(username, password) {
         const user = await userRepo.findUserByUsername(username);
         if (!user) {
-            const error = new Error("Invalid credentials");
-            error.status = 401;
-            throw error;
+            throw new HttpError(401, "Invalid credentials", "UNAUTHORIZED");
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            const error = new Error("Invalid credentials");
-            error.status = 401;
-            throw error;
+            throw new HttpError(401, "Invalid credentials", "UNAUTHORIZED");
         }
 
         const token = jwt.sign(

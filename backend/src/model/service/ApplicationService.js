@@ -1,7 +1,7 @@
 const applicationRepo = require('../../integration/repositories/applicationRepo');
 const ApplicationDTO = require('../DTO/ApplicationDTO');
-
 const { sequelize } = require('../../integration/persistence');
+const { HttpError } = require('../../errors/HttpsError');
 
 class ApplicationService {
  
@@ -14,43 +14,53 @@ class ApplicationService {
      * @return {Object} The created application data.
      */
     async sendApplication(applicationData) {
-        return await sequelize.transaction(async (t) => {
-            // Validate required fields
-            if (!applicationData.person_id) {
-                throw new Error("Person ID is required");
+        this.validateApplicationSubmission(applicationData);
+
+        return sequelize.transaction(async function (transaction) {
+            return applicationRepo.submitApplication(applicationData, transaction);
+        });
+    }
+
+
+    /**
+     * Validates the application data for submission. Checks for required fields and correct formats.
+     * @param {Object} applicationData - The application submission data.
+     */
+    validateApplicationSubmission(applicationData) {
+        if (!applicationData ||!applicationData.person_id) {
+                throw new HttpError(400, "Person ID is required", "BAD_REQUEST");
             }
 
             if (!applicationData.competencies || applicationData.competencies.length === 0) {
-                throw new Error("At least one competence is required");
+                throw new HttpError(400, "At least one competence is required", "BAD_REQUEST");
             }
 
             if (!applicationData.availabilities || applicationData.availabilities.length === 0) {
-                throw new Error("At least one availability period is required");
+                throw new HttpError(400, "At least one availability period is required", "BAD_REQUEST");
             }
+    
 
             // Validate competencies
             for (const comp of applicationData.competencies) {
-                if (!comp.competence_id || comp.years_of_experience == null) {
-                    throw new Error("Each competence must have competence_id and years_of_experience");
+                if (!comp.competence_id || comp.years_of_experience === undefined || comp.years_of_experience === null ) {
+                    throw new HttpError(400, "Each competence must have competence_id and years_of_experience", "BAD_REQUEST");
                 }
-                if (comp.years_of_experience < 0) {
-                    throw new Error("Years of experience cannot be negative");
+                if (Number(comp.years_of_experience) < 0) {
+                    throw new HttpError(400, "Years of experience can't be negative", "BAD_REQUEST");
                 }
             }
 
             // Validate availabilities
             for (const avail of applicationData.availabilities) {
                 if (!avail.from_date || !avail.to_date) {
-                    throw new Error("Each availability must have from_date and to_date");
+                    throw new HttpError(400, "Each availability must have from_date and to_date", "BAD_REQUEST");
                 }
                 if (new Date(avail.from_date) > new Date(avail.to_date)) {
-                    throw new Error("from_date cannot be after to_date");
+                    throw new HttpError(400, "from_date cannot be after to_date", "BAD_REQUEST");
                 }
             }
-
-            return applicationRepo.submitApplication(applicationData, t);
-        });
-    }
+        }
+    
 
     /**
      * Retrieves recent applications with full details.
