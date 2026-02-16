@@ -1,0 +1,13 @@
+{
+  "name": "recruitment-system-testing",
+  "version": "1.0.0",
+  "description": "Cross-browser testing for recruitment system",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "dependencies": {
+    "chromedriver": "^144.0.1",
+    "geckodriver": "^4.3.0",
+    "selenium-webdriver": "^4.16.0"
+  }
+}
