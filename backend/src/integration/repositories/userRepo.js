@@ -15,6 +15,16 @@ async function findUserByUsername(username) {
     const { Person, Role } = require('../persistence');
     return await Person.findOne({
         where: { username },
+            attributes: [
+      'person_id',
+      'username',
+      'password',
+      'role_id',
+      'name',
+      'surname',
+      'pnr',
+      'email'
+    ],
         include: [{ model: Role, as: 'role', attributes: ['name'] }],
         raw: true,
         nest: true

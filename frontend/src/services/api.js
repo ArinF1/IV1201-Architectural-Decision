@@ -64,8 +64,8 @@ export const applicationAPI = {
    * Get all applications
    * @returns {Promise} Response with list of applications
    */
-  getApplications: function () {
-    return apiClient.get('/applications');
+  getApplications: function (page = 1, pageSize = 10, hideEmpty = true) {
+  return apiClient.get('/applications', { params: { page, pageSize, hideEmpty } });
   },
 
   /**
@@ -120,13 +120,7 @@ export const applicationAPI = {
     return apiClient.post('/users/logout');
   },
 
-  /**
-   * Get all applications for recruiter
-   * @returns {Promise} Response with list of applications (fullName, status)
-   */
-  getAllApplicationsRecruiter: function () {
-    return apiClient.get('/applications/list');
-  },
+
 };
 
 export default apiClient;
