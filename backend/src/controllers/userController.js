@@ -157,7 +157,7 @@ exports.login = async (req, res, next) => {
       pnr: user.pnr,
       email: user.email,
       username: user.username,
-      role_id: user.role_id
+      role: user.role_id === 1 ? 'recruiter' : 'applicant'
     };
     res.status(200).json(userResponse);
   } catch (error) {

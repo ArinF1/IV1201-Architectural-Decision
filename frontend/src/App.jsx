@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
+import { Routes, Route, Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from './context/AuthContext';
 import ApplicationSubmission from './pages/ApplicationSubmission';
@@ -85,8 +85,16 @@ function App() {
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-8 py-8">
         <Routes>
-          <Route path="/" element={<ProtectedRoute><ApplicationSubmission /></ProtectedRoute>} />
-          <Route path="/applications" element={<ProtectedRoute><ApplicationList /></ProtectedRoute>} />
+          <Route path="/" element={
+            <ProtectedRoute>
+              {user?.role === "recruiter" ? <Navigate to="/applications" replace /> : <ApplicationSubmission />}
+            </ProtectedRoute>
+          } />
+          <Route path="/applications" element={
+            <ProtectedRoute>
+              {user?.role !== "recruiter" ? <Navigate to="/" replace /> : <ApplicationList />}
+            </ProtectedRoute>
+          } />
           <Route path="/register" element={<Registration />} />
           <Route path="/login" element={<Login />} />
           <Route path="/recruiter" element={<ProtectedRoute><RecruiterDashboard /></ProtectedRoute>} />
