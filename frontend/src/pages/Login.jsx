@@ -37,7 +37,7 @@ function Login() {
       login(response.data);
       localStorage.setItem('user', JSON.stringify(response.data));
       if (response.data.role === 'recruiter') {
-        navigate('/recruiter');
+        navigate('/applications');
       } else {
         navigate('/');
       }

@@ -17,7 +17,7 @@ function RoleBasedRedirect() {
     if (location.pathname === "/") {
       const user = JSON.parse(localStorage.getItem("user"));
       if (user && user.role === "recruiter") {
-        navigate("/recruiter", { replace: true });
+        navigate("/applications", { replace: true });
       }
     }
   }, [location, navigate]);
