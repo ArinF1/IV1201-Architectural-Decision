@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { applicationAPI } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 

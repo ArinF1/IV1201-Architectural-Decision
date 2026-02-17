@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { applicationAPI } from '../services/api';
