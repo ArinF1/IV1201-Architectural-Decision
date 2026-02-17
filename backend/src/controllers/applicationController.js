@@ -1,5 +1,6 @@
 const applicationService = require('../model/service/ApplicationService');
 const decisionMakingService = require('../model/service/DecisionMakingService');
+const { HttpError } = require('../errors/HttpsError');
 
 /**
  * Handles the creation of a new application.
@@ -33,40 +34,26 @@ exports.postApplication = async (req, res, next) => {
 };
 
 /**
- * Retrieves a list of recent applications with full details.
- * 
- * @param {import('express').Request} req - The Express request object.
- * @param {import('express').Response} res - The Express response object.
- * @param {import('express').NextFunction} next - The next middleware function.
- * @returns {Promise<void>} Sends a 200 OK response with an array of applications.
+ *  Retrieves a paginated list of applications for recruiters, with optional filtering to hide empty applications.
+ *  Checks that user has role_id 1 before proceeding.
  */
 exports.getApplications = async (req, res, next) => {
-    try {
-        const applications = await applicationService.getRecentApplications();
-        res.status(200).json({ success: true, data: applications });
-    } catch (error) {
-        next(error);
+  try {
+    const roleId = req.user && req.user.role_id;
+    if (roleId !== 1) {
+      throw new HttpError(403, 'Forbidden', 'FORBIDDEN');
     }
-};
 
-/**
- * Lists all applications for recruiters.
- */
-exports.listAllApplications = async (req, res, next) => {
-    try {
-        // Check recruiter role (role 1 = recruiter)
-        const userRole = req.user && req.user.role;
-        if (userRole !== 1) {
-            const error = new Error('Forbidden');
-            error.status = 403;
-            return next(error);
-        }
+    const page = req.query.page;
+    const pageSize = req.query.pageSize;
+    const hideEmpty = req.query.hideEmpty !== 'false'; 
 
-        const list = await applicationService.listAllApplications();
-        res.status(200).json({ success: true, data: list });
-    } catch (error) {
-        next(error);
-    }
+    const result = await applicationService.getApplicationsPage(page, pageSize, hideEmpty);
+    res.status(200).json({ success: true, data: result });
+  } catch (error) {
+    next(error);
+  }
+
 };
 
 /**

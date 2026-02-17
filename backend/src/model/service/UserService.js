@@ -74,15 +74,12 @@ class UserService {
             throw new HttpError(401, "Invalid credentials", "UNAUTHORIZED");
         }
 
-        // user.role.name will be 'recruiter' or 'applicant'
-        const roleName = user.role && user.role.name ? user.role.name : (user.role_id === 1 ? 'recruiter' : 'applicant');
         const token = jwt.sign(
-            { id: user.person_id, role: roleName },
+            { id: user.person_id, role_id: user.role_id },
             process.env.JWT_SECRET,
             { expiresIn: '1h' }
-        );
-        // Return role as string in user-objektet också
-        return { token, user: { ...user, role: roleName } };
+        )
+        return { token, user: { ...user, role_id: user.role_id } };
     }
 }
 

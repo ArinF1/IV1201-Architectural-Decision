@@ -92,44 +92,62 @@ async function submitApplication(applicationData, transaction) {
 
 /**
  * Lists applicants from the database via applicantdata through their competence and availability data.
- * @param {number} limit - The maximum number of applications to retrieve (default: 50).
- * @return {Array} An array of application instances with related data.
+ * @param {number} limit - The maximum number of applications to retrieve.
+ * @param {number} offset - How many applicants to skip (pagination).
+ * @param {boolean} hideEmpty - hides applicants with no competence profiles or availabilities when true, shows all applicants when false.
+ * 
  */
-async function listApplications(limit = 50) {
-    const persons = await Person.findAll({
-    where: { role_id: 2 }, // applicants are role_id = 2 (from the database, 1 = Recruiter)
+async function listApplications(limit = 10, offset = 0, hideEmpty = true) {
+  const whereClause = { role_id: 2 };
+
+  const baseInclude = [
+    {
+      model: CompetenceProfile,
+      as: "competenceProfiles",
+      required: hideEmpty, // only includes persons that HAVE competenceProfiles when hideEmpty=true
+      attributes: ["competence_profile_id", "competence_id", "years_of_experience"],
+      include: [
+        {
+          model: Competence,
+          as: "competence",
+          attributes: ["competence_id", "name"],
+        },
+      ],
+    },
+    {
+      model: Availability,
+      as: "availabilities",
+      required: hideEmpty, // only includes persons that HAVE availabilities when hideEmpty=true
+      attributes: ["availability_id", "from_date", "to_date"],
+    },
+  ];
+
+  const totalCount = await Person.count({
+    where: whereClause,
+    distinct: true,
+    col: "person_id",
+    include: baseInclude,
+  });
+
+  const persons = await Person.findAll({
+    where: whereClause,
     attributes: ["person_id", "name", "surname", "email", "pnr"],
-    include: [
-      {
-        model: CompetenceProfile,
-        as: "competenceProfiles",
-        attributes: ["competence_profile_id", "competence_id", "years_of_experience"],
-        include: [
-          {
-            model: Competence,
-            as: "competence",
-            attributes: ["competence_id", "name"],
-          },
-        ],
-      },
-      {
-        model: Availability,
-        as: "availabilities",
-        attributes: ["availability_id", "from_date", "to_date"],
-      },
-    ],
+    include: baseInclude,
     limit,
+    offset,
     order: [["person_id", "DESC"]],
   });
 
-  return persons.map(function (person) {
+  const applications = persons.map((person) => {
     const plain = person.get({ plain: true });
     return {
-        application_id: plain.person_id,
-        person: plain,
-        status: 'unhandled',
+      application_id: plain.person_id,
+      person: plain,
+      status: "unhandled",
     };
   });
+
+  return { totalCount, applications };
 }
 
 /**

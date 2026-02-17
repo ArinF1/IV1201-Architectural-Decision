@@ -60,46 +60,6 @@ class ApplicationService {
                 }
             }
         }
-    
-
-    /**
-     * Retrieves recent applications with full details.
-     * @return {Array} Array of applications with person, competence, and availability data.
-     */
-    async getRecentApplications() {
-        const applications = await applicationRepo.listApplications(50);
-        if (!applications) {
-            throw new Error("Failed to retrieve applications");
-        }
-        return applications.map(app => 
-            new ApplicationDTO(
-                app.person?.name, 
-                app.person?.surname,
-                app.status || 'unhandled')
-        );
-    }
-
-    /**
-     * Retrieves all applications (for recruiters) with applicant full name and status.
-     * @returns {Array<{fullName: string, status: string}>}
-     */
-    async listAllApplications() {
-        // use a large limit to return all for now
-        const applications = await applicationRepo.listApplications(1000);
-        if (!applications) {
-            throw new Error("Failed to retrieve applications");
-        }
-
-        return applications.map(function(app) {
-            const person = app.person || {};
-            const first = person.name || '';
-            const last = person.surname || '';
-            return {
-                fullName: `${first} ${last}`.trim(),
-                status: app.status || 'unhandled'
-            };
-        });
-    }
 
     /**
      * Gets all available competencies.
@@ -112,6 +72,50 @@ class ApplicationService {
         }
         return competencies;
     }
+
+    /**
+     * Gets applications for a specific page.
+     * @param {number} page - The page number (1-indexed).
+     * @param {number} pageSize - The number of applications per page.
+     * @param {boolean} hideEmpty - Whether to hide empty applications.
+     * @returns {Object} The paginated applications and metadata.
+     */
+    async getApplicationsPage(page, pageSize, hideEmpty) {
+        const safePage = Number(page) || 1;
+        const safePageSize = Math.min(Number(pageSize) || 10, 10);
+
+        if (safePage < 1 || safePageSize < 1) {
+          throw new HttpError(400, "Invalid page or pageSize", "BAD_REQUEST");
+     }
+
+        const offset = (safePage - 1) * safePageSize;
+        const result = await applicationRepo.listApplications(safePageSize, offset, Boolean(hideEmpty));
+        const totalPages = Math.ceil(result.totalCount / safePageSize);
+
+        const dtoApplications = result.applications.map(app => {
+          const p = app.person || {};
+    
+          return new ApplicationDTO({
+            applicationId: app.application_id,
+            personId: p.person_id,
+            personNumber: p.pnr,
+            fullName: `${p.name || ""} ${p.surname || ""}`.trim(),
+            status: app.status || "unhandled",
+            competenceProfiles: (p.competenceProfiles || []).map(cp => ({
+              competenceId: cp.competence_id,
+              competenceName: cp.competence ? cp.competence.name : null,
+              yearsOfExperience: cp.years_of_experience
+            })),
+            availabilities: (p.availabilities || []).map(a => ({
+              fromDate: a.from_date,
+              toDate: a.to_date
+            }))
+          });
+        });
+
+         return { page: safePage, pageSize: safePageSize, totalCount: result.totalCount, totalPages, applications: dtoApplications };
+        }   
+        
 
 }
 
