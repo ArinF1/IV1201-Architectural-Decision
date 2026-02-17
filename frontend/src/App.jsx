@@ -17,16 +17,17 @@ function RoleBasedRedirect() {
     if (location.pathname === "/") {
       const user = JSON.parse(localStorage.getItem("user"));
       if (user && user.role === "recruiter") {
-        navigate("/recruiter", { replace: true });
+        navigate("/applications", { replace: true });
       }
     }
   }, [location, navigate]);
   return null;
 }
 
+
 function App() {
   const { t } = useTranslation();
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, user, logout } = useAuth();
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -35,55 +36,45 @@ function App() {
         <div className="max-w-7xl mx-auto px-8 py-4 flex justify-between items-center">
           <h1 className="text-2xl font-semibold">{t('nav.title')}</h1>
           <div className="flex items-center gap-8">
-            <ul className="flex gap-8 list-none">
-              {isAuthenticated && (
-                <>
-                  <li>
-                    <Link
-                      to="/"
-                      className="text-white no-underline px-4 py-2 rounded hover:bg-slate-700 transition-colors"
-                    >
-                      {t('nav.submitApplication')}
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/applications"
-                      className="text-white no-underline px-4 py-2 rounded hover:bg-slate-700 transition-colors"
-                    >
-                      {t('nav.viewApplications')}
-                    </Link>
-                  </li>
-                </>
+            <ul className="flex gap-8 list-none items-center">
+              {isAuthenticated && user?.role !== "recruiter" && (
+                <li>
+                  <Link
+                    to="/"
+                    className="bg-slate-700 text-white no-underline px-4 py-2 rounded transition-colors hover:bg-slate-600 shadow"
+                  >
+                    {t('nav.submitApplication')}
+                  </Link>
+                </li>
               )}
-              {!isAuthenticated && (
-                <>
-                  <li>
-                    <Link
-                      to="/register"
-                      className="text-white no-underline px-4 py-2 rounded hover:bg-slate-700 transition-colors"
-                    >
-                      {t('nav.register')}
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/login"
-                      className="text-white no-underline px-4 py-2 rounded hover:bg-slate-700 transition-colors"
-                    >
-                      {t('nav.login')}
-                    </Link>
-                  </li>
-                </>
+              {isAuthenticated && user?.role === "recruiter" && (
+                <li>
+                  <Link
+                    to="/applications"
+                    className="bg-slate-700 text-white no-underline px-4 py-2 rounded transition-colors hover:bg-slate-600 shadow"
+                  >
+                    {t('nav.viewApplications')}
+                  </Link>
+                </li>
               )}
               {isAuthenticated && (
                 <li>
                   <button
                     onClick={logout}
-                    className="text-white no-underline px-4 py-2 rounded hover:bg-slate-700 transition-colors bg-transparent border-none cursor-pointer text-base"
+                    className="bg-slate-700 text-white no-underline px-4 py-2 rounded transition-colors hover:bg-slate-600 shadow"
                   >
                     {t('nav.logout')}
                   </button>
+                </li>
+              )}
+              {!isAuthenticated && (
+                <li>
+                  <Link
+                    to="/login"
+                    className="bg-slate-700 text-white no-underline px-4 py-2 rounded transition-colors hover:bg-slate-600 shadow"
+                  >
+                    {t('nav.login')}
+                  </Link>
                 </li>
               )}
             </ul>
