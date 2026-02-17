@@ -1,4 +1,4 @@
-import React from 'react';
+import { useEffect } from 'react';
 import { Routes, Route, Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from './context/AuthContext';
@@ -13,7 +13,7 @@ import RecruiterDashboard from './pages/RecruiterDashboard';
 function RoleBasedRedirect() {
   const location = useLocation();
   const navigate = useNavigate();
-  React.useEffect(() => {
+  useEffect(() => {
     if (location.pathname === "/") {
       const user = JSON.parse(localStorage.getItem("user"));
       if (user && user.role === "recruiter") {
