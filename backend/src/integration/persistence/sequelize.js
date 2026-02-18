@@ -1,10 +1,9 @@
 const { Sequelize } = require('sequelize');  // Imports sequelize library
 
-/*
-* The function creates and returns a new Sequelize instance that is used for db access.
-* The instance is then connected to the postgres database via the DATABASE_URL variable (from.env).
-* @returns - returns a Sequelize instance connected to the database.
-*/
+/**
+ * Creates a Sequelize instance connected to the database via DATABASE_URL.
+ * @returns {import('sequelize').Sequelize} The configured Sequelize instance.
+ */
 function createSequelizeInstance() {
     const databaseURL = process.env.DATABASE_URL;
     if (!databaseURL) {

@@ -34,8 +34,10 @@ exports.postApplication = async (req, res, next) => {
 };
 
 /**
- *  Retrieves a paginated list of applications for recruiters, with optional filtering to hide empty applications.
- *  Checks that user has role_id 1 before proceeding.
+ * Gets a paginated list of applications. Recruiter-only (role_id 1).
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
  */
 exports.getApplications = async (req, res, next) => {
     try {

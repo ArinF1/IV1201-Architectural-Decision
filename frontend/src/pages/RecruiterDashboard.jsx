@@ -2,6 +2,11 @@ import { useEffect, useState } from 'react';
 import { applicationAPI } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 
+/**
+ * Colored badge showing the application status.
+ * @param {{ status: string }} props
+ * @returns {JSX.Element}
+ */
 function StatusBadge({ status }) {
   let color = 'bg-gray-300 text-gray-800';
   if (status === 'accepted') color = 'bg-green-200 text-green-800';
@@ -10,6 +15,10 @@ function StatusBadge({ status }) {
   return <span className={`px-2 py-1 rounded text-xs font-semibold ${color}`}>{status}</span>;
 }
 
+/**
+ * Recruiter dashboard. Shows a table of all applications.
+ * @returns {JSX.Element}
+ */
 export default function RecruiterDashboard() {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);

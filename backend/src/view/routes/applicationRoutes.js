@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Application route definitions.
+ * @module routes/applicationRoutes
+ */
 const express = require('express');
 const router = express.Router();
 

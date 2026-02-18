@@ -1,8 +1,11 @@
 const jwt = require('jsonwebtoken');
 
 /**
- * Middleware to authenticate users via JWT stored in an HTTP-only cookie.
- * Rationale: Protects routes from unauthorized access and prevents XSS token theft.
+ * Middleware that verifies the JWT from the auth cookie.
+ * Attaches the decoded user to req.user on success.
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
  */
 const authenticateToken = (req, res, next) => {
     //Get token from the cookie 
@@ -17,10 +20,10 @@ const authenticateToken = (req, res, next) => {
     try {
         // Verify the token using JWT_SECRET from .env
         const verified = jwt.verify(token, process.env.JWT_SECRET);
-        
+
         //Attach user data (id = person_id, role) to the request object
-        req.user = verified; 
-        
+        req.user = verified;
+
         // Move to the next function (the Controller)
         next();
     } catch (err) {

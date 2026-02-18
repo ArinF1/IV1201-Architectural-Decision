@@ -2,10 +2,14 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { applicationAPI } from '../services/api';
 
+/**
+ * Application form page. Lets applicants submit competencies and availability.
+ * @returns {JSX.Element}
+ */
 function ApplicationSubmission() {
   const { t } = useTranslation();
   // Get user data from localStorage (set during login)
-  const [userData] = useState(function() {
+  const [userData] = useState(function () {
     const user = localStorage.getItem('user');
     if (user) {
       const parsed = JSON.parse(user);
@@ -41,7 +45,7 @@ function ApplicationSubmission() {
   const [validationErrors, setValidationErrors] = useState({});
 
   // Fetch available competencies on component mount
-  useEffect(function() {
+  useEffect(function () {
     fetchCompetencies();
   }, []);
 
@@ -63,7 +67,7 @@ function ApplicationSubmission() {
 
   function removeCompetence(index) {
     if (selectedCompetencies.length > 1) {
-      const updated = selectedCompetencies.filter(function(_, i) {
+      const updated = selectedCompetencies.filter(function (_, i) {
         return i !== index;
       });
       setSelectedCompetencies(updated);
@@ -97,7 +101,7 @@ function ApplicationSubmission() {
 
   function removeAvailability(index) {
     if (availabilities.length > 1) {
-      const updated = availabilities.filter(function(_, i) {
+      const updated = availabilities.filter(function (_, i) {
         return i !== index;
       });
       setAvailabilities(updated);
@@ -126,7 +130,7 @@ function ApplicationSubmission() {
     const errors = {};
 
     // Validate competencies
-    selectedCompetencies.forEach(function(comp, index) {
+    selectedCompetencies.forEach(function (comp, index) {
       if (!comp.competence_id) {
         errors[`competence_${index}`] = t('applicationSubmission.pleaseSelectCompetence');
       }
@@ -139,7 +143,7 @@ function ApplicationSubmission() {
     });
 
     // Validate availabilities
-    availabilities.forEach(function(avail, index) {
+    availabilities.forEach(function (avail, index) {
       if (!avail.from_date) {
         errors[`from_date_${index}`] = t('applicationSubmission.pleaseSelectStartDate');
       }
@@ -170,13 +174,13 @@ function ApplicationSubmission() {
     try {
       const applicationData = {
         person_id: userData.person_id,
-        competencies: selectedCompetencies.map(function(comp) {
+        competencies: selectedCompetencies.map(function (comp) {
           return {
             competence_id: parseInt(comp.competence_id),
             years_of_experience: parseFloat(comp.years_of_experience),
           };
         }),
-        availabilities: availabilities.map(function(avail) {
+        availabilities: availabilities.map(function (avail) {
           return {
             from_date: avail.from_date,
             to_date: avail.to_date,
@@ -186,7 +190,7 @@ function ApplicationSubmission() {
 
       await applicationAPI.submitApplication(applicationData);
       setSuccess(true);
-      
+
       // Reset form
       setSelectedCompetencies([{ competence_id: '', years_of_experience: '' }]);
       setAvailabilities([{ from_date: '', to_date: '' }]);
@@ -227,7 +231,7 @@ function ApplicationSubmission() {
           <p className="text-gray-600 text-sm mb-6">
             {t('applicationSubmission.personalInfoDesc')}
           </p>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="flex flex-col gap-1">
               <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">{t('applicationSubmission.firstName')}</label>
@@ -255,75 +259,73 @@ function ApplicationSubmission() {
             {t('applicationSubmission.competenceProfileDesc')}
           </p>
 
-          {selectedCompetencies.map(function(comp, index) {
+          {selectedCompetencies.map(function (comp, index) {
             return (
-            <div key={index} className="flex gap-4 mb-4 p-5 bg-gray-50 rounded-lg border border-gray-200">
-              <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm font-medium text-gray-700">
-                    {t('applicationSubmission.areaOfExpertise')} <span className="text-red-600">{t('common.required')}</span>
-                  </label>
-                  <select
-                    value={comp.competence_id}
-                    onChange={function(e) { updateCompetence(index, 'competence_id', e.target.value); }}
-                    className={`px-3 py-2 text-base border rounded-md transition-all bg-white ${
-                      validationErrors[`competence_${index}`] 
-                        ? 'border-red-500 focus:border-red-500 focus:ring-red-100' 
-                        : 'border-gray-300 focus:border-blue-500 focus:ring-blue-100'
-                    } focus:outline-none focus:ring-4`}
+              <div key={index} className="flex gap-4 mb-4 p-5 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-2">
+                    <label className="text-sm font-medium text-gray-700">
+                      {t('applicationSubmission.areaOfExpertise')} <span className="text-red-600">{t('common.required')}</span>
+                    </label>
+                    <select
+                      value={comp.competence_id}
+                      onChange={function (e) { updateCompetence(index, 'competence_id', e.target.value); }}
+                      className={`px-3 py-2 text-base border rounded-md transition-all bg-white ${validationErrors[`competence_${index}`]
+                          ? 'border-red-500 focus:border-red-500 focus:ring-red-100'
+                          : 'border-gray-300 focus:border-blue-500 focus:ring-blue-100'
+                        } focus:outline-none focus:ring-4`}
+                      disabled={loading}
+                    >
+                      <option value="">{t('applicationSubmission.selectCompetence')}</option>
+                      {competencies.map(function (c) {
+                        return (
+                          <option key={c.competence_id} value={c.competence_id}>
+                            {c.name}
+                          </option>
+                        );
+                      })}
+                    </select>
+                    {validationErrors[`competence_${index}`] && (
+                      <span className="text-red-600 text-sm">{validationErrors[`competence_${index}`]}</span>
+                    )}
+                  </div>
+
+                  <div className="flex flex-col gap-2">
+                    <label className="text-sm font-medium text-gray-700">
+                      {t('applicationSubmission.yearsOfExperience')} <span className="text-red-600">{t('common.required')}</span>
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="99.99"
+                      step="0.01"
+                      value={comp.years_of_experience}
+                      onChange={function (e) { updateCompetence(index, 'years_of_experience', e.target.value); }}
+                      className={`px-3 py-2 text-base border rounded-md transition-all ${validationErrors[`experience_${index}`]
+                          ? 'border-red-500 focus:border-red-500 focus:ring-red-100'
+                          : 'border-gray-300 focus:border-blue-500 focus:ring-blue-100'
+                        } focus:outline-none focus:ring-4`}
+                      placeholder="e.g., 2.5"
+                      disabled={loading}
+                    />
+                    {validationErrors[`experience_${index}`] && (
+                      <span className="text-red-600 text-sm">{validationErrors[`experience_${index}`]}</span>
+                    )}
+                  </div>
+                </div>
+
+                {selectedCompetencies.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={function () { removeCompetence(index); }}
+                    className="bg-transparent border-0 text-red-600 text-2xl cursor-pointer px-2 py-2 w-10 h-10 rounded-md transition-colors hover:bg-red-50 disabled:opacity-40 disabled:cursor-not-allowed self-start"
                     disabled={loading}
+                    aria-label="Remove competence"
                   >
-                    <option value="">{t('applicationSubmission.selectCompetence')}</option>
-                    {competencies.map(function(c) {
-                      return (
-                      <option key={c.competence_id} value={c.competence_id}>
-                        {c.name}
-                      </option>
-                      );
-                    })}
-                  </select>
-                  {validationErrors[`competence_${index}`] && (
-                    <span className="text-red-600 text-sm">{validationErrors[`competence_${index}`]}</span>
-                  )}
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm font-medium text-gray-700">
-                    {t('applicationSubmission.yearsOfExperience')} <span className="text-red-600">{t('common.required')}</span>
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    max="99.99"
-                    step="0.01"
-                    value={comp.years_of_experience}
-                    onChange={function(e) { updateCompetence(index, 'years_of_experience', e.target.value); }}
-                    className={`px-3 py-2 text-base border rounded-md transition-all ${
-                      validationErrors[`experience_${index}`] 
-                        ? 'border-red-500 focus:border-red-500 focus:ring-red-100' 
-                        : 'border-gray-300 focus:border-blue-500 focus:ring-blue-100'
-                    } focus:outline-none focus:ring-4`}
-                    placeholder="e.g., 2.5"
-                    disabled={loading}
-                  />
-                  {validationErrors[`experience_${index}`] && (
-                    <span className="text-red-600 text-sm">{validationErrors[`experience_${index}`]}</span>
-                  )}
-                </div>
+                    ✕
+                  </button>
+                )}
               </div>
-
-              {selectedCompetencies.length > 1 && (
-                <button
-                  type="button"
-                  onClick={function() { removeCompetence(index); }}
-                  className="bg-transparent border-0 text-red-600 text-2xl cursor-pointer px-2 py-2 w-10 h-10 rounded-md transition-colors hover:bg-red-50 disabled:opacity-40 disabled:cursor-not-allowed self-start"
-                  disabled={loading}
-                  aria-label="Remove competence"
-                >
-                  ✕
-                </button>
-              )}
-            </div>
             );
           })}
 
@@ -344,63 +346,61 @@ function ApplicationSubmission() {
             {t('applicationSubmission.availabilityDesc')}
           </p>
 
-          {availabilities.map(function(avail, index) {
+          {availabilities.map(function (avail, index) {
             return (
-            <div key={index} className="flex gap-4 mb-4 p-5 bg-gray-50 rounded-lg border border-gray-200">
-              <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm font-medium text-gray-700">
-                    {t('applicationSubmission.fromDate')} <span className="text-red-600">{t('common.required')}</span>
-                  </label>
-                  <input
-                    type="date"
-                    value={avail.from_date}
-                    onChange={function(e) { updateAvailability(index, 'from_date', e.target.value); }}
-                    className={`px-3 py-2 text-base border rounded-md transition-all ${
-                      validationErrors[`from_date_${index}`] 
-                        ? 'border-red-500 focus:border-red-500 focus:ring-red-100' 
-                        : 'border-gray-300 focus:border-blue-500 focus:ring-blue-100'
-                    } focus:outline-none focus:ring-4`}
-                    disabled={loading}
-                  />
-                  {validationErrors[`from_date_${index}`] && (
-                    <span className="text-red-600 text-sm">{validationErrors[`from_date_${index}`]}</span>
-                  )}
+              <div key={index} className="flex gap-4 mb-4 p-5 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-2">
+                    <label className="text-sm font-medium text-gray-700">
+                      {t('applicationSubmission.fromDate')} <span className="text-red-600">{t('common.required')}</span>
+                    </label>
+                    <input
+                      type="date"
+                      value={avail.from_date}
+                      onChange={function (e) { updateAvailability(index, 'from_date', e.target.value); }}
+                      className={`px-3 py-2 text-base border rounded-md transition-all ${validationErrors[`from_date_${index}`]
+                          ? 'border-red-500 focus:border-red-500 focus:ring-red-100'
+                          : 'border-gray-300 focus:border-blue-500 focus:ring-blue-100'
+                        } focus:outline-none focus:ring-4`}
+                      disabled={loading}
+                    />
+                    {validationErrors[`from_date_${index}`] && (
+                      <span className="text-red-600 text-sm">{validationErrors[`from_date_${index}`]}</span>
+                    )}
+                  </div>
+
+                  <div className="flex flex-col gap-2">
+                    <label className="text-sm font-medium text-gray-700">
+                      {t('applicationSubmission.toDate')} <span className="text-red-600">{t('common.required')}</span>
+                    </label>
+                    <input
+                      type="date"
+                      value={avail.to_date}
+                      onChange={function (e) { updateAvailability(index, 'to_date', e.target.value); }}
+                      className={`px-3 py-2 text-base border rounded-md transition-all ${validationErrors[`to_date_${index}`]
+                          ? 'border-red-500 focus:border-red-500 focus:ring-red-100'
+                          : 'border-gray-300 focus:border-blue-500 focus:ring-blue-100'
+                        } focus:outline-none focus:ring-4`}
+                      disabled={loading}
+                    />
+                    {validationErrors[`to_date_${index}`] && (
+                      <span className="text-red-600 text-sm">{validationErrors[`to_date_${index}`]}</span>
+                    )}
+                  </div>
                 </div>
 
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm font-medium text-gray-700">
-                    {t('applicationSubmission.toDate')} <span className="text-red-600">{t('common.required')}</span>
-                  </label>
-                  <input
-                    type="date"
-                    value={avail.to_date}
-                    onChange={function(e) { updateAvailability(index, 'to_date', e.target.value); }}
-                    className={`px-3 py-2 text-base border rounded-md transition-all ${
-                      validationErrors[`to_date_${index}`] 
-                        ? 'border-red-500 focus:border-red-500 focus:ring-red-100' 
-                        : 'border-gray-300 focus:border-blue-500 focus:ring-blue-100'
-                    } focus:outline-none focus:ring-4`}
+                {availabilities.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={function () { removeAvailability(index); }}
+                    className="bg-transparent border-0 text-red-600 text-2xl cursor-pointer px-2 py-2 w-10 h-10 rounded-md transition-colors hover:bg-red-50 disabled:opacity-40 disabled:cursor-not-allowed self-start"
                     disabled={loading}
-                  />
-                  {validationErrors[`to_date_${index}`] && (
-                    <span className="text-red-600 text-sm">{validationErrors[`to_date_${index}`]}</span>
-                  )}
-                </div>
+                    aria-label="Remove availability"
+                  >
+                    ✕
+                  </button>
+                )}
               </div>
-
-              {availabilities.length > 1 && (
-                <button
-                  type="button"
-                  onClick={function() { removeAvailability(index); }}
-                  className="bg-transparent border-0 text-red-600 text-2xl cursor-pointer px-2 py-2 w-10 h-10 rounded-md transition-colors hover:bg-red-50 disabled:opacity-40 disabled:cursor-not-allowed self-start"
-                  disabled={loading}
-                  aria-label="Remove availability"
-                >
-                  ✕
-                </button>
-              )}
-            </div>
             );
           })}
 

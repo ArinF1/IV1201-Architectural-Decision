@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Application entry point. Mounts React into the DOM.
+ * @module main
+ */
 import { StrictMode } from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';

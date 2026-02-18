@@ -4,6 +4,10 @@ import { useTranslation } from 'react-i18next';
 import { applicationAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
+/**
+ * Login page. Submits credentials and stores the session on success.
+ * @returns {JSX.Element}
+ */
 function Login() {
   const { t } = useTranslation();
   const navigate = useNavigate();

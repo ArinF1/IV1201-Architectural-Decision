@@ -2,15 +2,15 @@ const { sequelize } = require('./sequelize'); // Imports config. sequelize insta
 const { defineCompetenceModel } = require('./tables/competence');
 const { defineCompetenceProfileModel } = require('./tables/competenceProfile');
 const { defineAvailabilityModel } = require('./tables/availability');
-const { definePersonModel } = require('./tables/person'); 
-const { defineRoleModel } = require('./tables/role');   
+const { definePersonModel } = require('./tables/person');
+const { defineRoleModel } = require('./tables/role');
 
 // Define all models
 const Competence = defineCompetenceModel(sequelize);
 const CompetenceProfile = defineCompetenceProfileModel(sequelize);
 const Availability = defineAvailabilityModel(sequelize);
 const Role = defineRoleModel(sequelize);
-const Person = definePersonModel(sequelize); 
+const Person = definePersonModel(sequelize);
 
 // Define relationships
 CompetenceProfile.belongsTo(Person, { foreignKey: 'person_id', as: 'person' });
@@ -25,12 +25,10 @@ Person.hasMany(CompetenceProfile, { foreignKey: 'person_id', as: 'competenceProf
 Person.hasMany(Availability, { foreignKey: 'person_id', as: 'availabilities' });
 
 
-/*
-* Database is initialized and synched with the defined models. 
-* The function is for external use to set up the database connection and ensure models are in sync.
-* authenticate verifies the connection to the database.
-*/
-
+/**
+ * Authenticates the database connection and syncs models.
+ * @returns {Promise<void>}
+ */
 async function initDb() {
     await sequelize.authenticate();
 }

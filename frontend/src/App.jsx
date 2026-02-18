@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Main application layout with routing and navigation.
+ * @module App
+ */
 import { useEffect } from 'react';
 import { Routes, Route, Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -10,6 +14,10 @@ import LanguageSelector from './components/LanguageSelector';
 import ProtectedRoute from './components/ProtectedRoute';
 import RecruiterDashboard from './pages/RecruiterDashboard';
 
+/**
+ * Redirects recruiters from "/" to "/applications" on mount.
+ * @returns {null}
+ */
 function RoleBasedRedirect() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -25,6 +33,10 @@ function RoleBasedRedirect() {
 }
 
 
+/**
+ * Root component. Renders navigation bar and page routes.
+ * @returns {JSX.Element}
+ */
 function App() {
   const { t } = useTranslation();
   const { isAuthenticated, user, logout } = useAuth();

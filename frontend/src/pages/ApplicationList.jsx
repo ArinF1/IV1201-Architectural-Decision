@@ -2,6 +2,10 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { applicationAPI } from '../services/api';
 
+/**
+ * Recruiter view. Displays a paginated, filterable list of applications.
+ * @returns {JSX.Element}
+ */
 function ApplicationList() {
   const { t } = useTranslation();
 
@@ -154,13 +158,12 @@ function ApplicationList() {
                         <h3 className="text-xl font-semibold text-slate-800 mb-1">{app.fullName}</h3>
                         <p className="text-gray-400 text-xs">Person Number: {app.personNumber}</p>
                       </div>
-                      <span className={`px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap ${
-                        app.status === 'accepted'
+                      <span className={`px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap ${app.status === 'accepted'
                           ? 'bg-green-100 text-green-800'
                           : app.status === 'rejected'
-                          ? 'bg-red-100 text-red-800'
-                          : 'bg-yellow-100 text-yellow-800'
-                      }`}>
+                            ? 'bg-red-100 text-red-800'
+                            : 'bg-yellow-100 text-yellow-800'
+                        }`}>
                         {(app.status || 'unhandled').charAt(0).toUpperCase() + (app.status || 'unhandled').slice(1)}
                       </span>
                     </div>

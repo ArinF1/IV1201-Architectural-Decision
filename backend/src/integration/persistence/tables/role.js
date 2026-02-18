@@ -2,8 +2,8 @@ const { DataTypes } = require('sequelize');
 
 /**
  * Defines the Role model in the database.
- * Representation for the different roles of a person, such as applicant, admin, etc.
- * @param sequelize - The Sequelize instance to define the model on.
+ * @param {import('sequelize').Sequelize} sequelize - The Sequelize instance.
+ * @returns {import('sequelize').Model} The defined Role model.
  */
 function defineRoleModel(sequelize) {
     return sequelize.define('Role', {

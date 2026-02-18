@@ -3,6 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { applicationAPI } from '../services/api';
 
+/**
+ * Registration page. Collects user details and creates a new account.
+ * @returns {JSX.Element}
+ */
 function Registration() {
   const { t } = useTranslation();
   const navigate = useNavigate();
