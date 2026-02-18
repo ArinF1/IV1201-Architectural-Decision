@@ -1,6 +1,6 @@
-const applicationService = require('../model/service/ApplicationService');
-const decisionMakingService = require('../model/service/DecisionMakingService');
-const { HttpError } = require('../errors/HttpsError');
+const applicationService = require('../model/service/applicationService');
+const decisionMakingService = require('../model/service/decisionMakingService');
+const { HttpError } = require('../errors/httpsError');
 
 /**
  * Handles the creation of a new application.
@@ -38,21 +38,21 @@ exports.postApplication = async (req, res, next) => {
  *  Checks that user has role_id 1 before proceeding.
  */
 exports.getApplications = async (req, res, next) => {
-  try {
-    const roleId = req.user && req.user.role_id;
-    if (roleId !== 1) {
-      throw new HttpError(403, 'Forbidden', 'FORBIDDEN');
+    try {
+        const roleId = req.user && req.user.role_id;
+        if (roleId !== 1) {
+            throw new HttpError(403, 'Forbidden', 'FORBIDDEN');
+        }
+
+        const page = req.query.page;
+        const pageSize = req.query.pageSize;
+        const hideEmpty = req.query.hideEmpty !== 'false';
+
+        const result = await applicationService.getApplicationsPage(page, pageSize, hideEmpty);
+        res.status(200).json({ success: true, data: result });
+    } catch (error) {
+        next(error);
     }
-
-    const page = req.query.page;
-    const pageSize = req.query.pageSize;
-    const hideEmpty = req.query.hideEmpty !== 'false'; 
-
-    const result = await applicationService.getApplicationsPage(page, pageSize, hideEmpty);
-    res.status(200).json({ success: true, data: result });
-  } catch (error) {
-    next(error);
-  }
 
 };
 

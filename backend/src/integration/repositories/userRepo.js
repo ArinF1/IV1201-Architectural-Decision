@@ -1,5 +1,5 @@
 const { Person } = require('../persistence');
-const { HttpError } = require('../../errors/HttpsError');
+const { HttpError } = require('../../errors/httpsError');
 
 /**
  * Data Access Object (DAO) for User-related database operations.
@@ -15,16 +15,16 @@ async function findUserByUsername(username) {
     const { Person, Role } = require('../persistence');
     return await Person.findOne({
         where: { username },
-            attributes: [
-      'person_id',
-      'username',
-      'password',
-      'role_id',
-      'name',
-      'surname',
-      'pnr',
-      'email'
-    ],
+        attributes: [
+            'person_id',
+            'username',
+            'password',
+            'role_id',
+            'name',
+            'surname',
+            'pnr',
+            'email'
+        ],
         include: [{ model: Role, as: 'role', attributes: ['name'] }],
         raw: true,
         nest: true
@@ -38,12 +38,12 @@ async function findUserByUsername(username) {
  * @returns {Promise<Object>} The created user instance.
  */
 async function createUser(userData, transaction) {
-  if (!transaction) {
-    throw new HttpError(500, "DB transaction is required for creating a user", "INTERNAL_SERVER_ERROR");
-  }
+    if (!transaction) {
+        throw new HttpError(500, "DB transaction is required for creating a user", "INTERNAL_SERVER_ERROR");
+    }
 
-  const createdUser = await Person.create(userData, { transaction: transaction });
-  return createdUser.get({ plain: true });
+    const createdUser = await Person.create(userData, { transaction: transaction });
+    return createdUser.get({ plain: true });
 }
 
 /**
@@ -64,7 +64,7 @@ async function findAllUsers() {
  */
 async function findUserById(id) {
     return await Person.findByPk(id, {
-        attributes: ['person_id', 'name', 'surname', 'email', 'role_id', 'username', 'pnr'],   
+        attributes: ['person_id', 'name', 'surname', 'email', 'role_id', 'username', 'pnr'],
         raw: true
     });
 }

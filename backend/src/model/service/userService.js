@@ -2,7 +2,7 @@ const userRepo = require('../../integration/repositories/userRepo');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { sequelize } = require('../../integration/persistence');
-const { HttpError } = require('../../errors/HttpsError');
+const { HttpError } = require('../../errors/httpsError');
 
 /**
  * Application Layer service for user-related business logic.
