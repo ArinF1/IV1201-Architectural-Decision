@@ -15,9 +15,29 @@ const userRoutes = require('./view/routes/userRoutes');
 
 const app = express();
 
+/**
+ * Whitelist of allowed origins for CORS.
+ * Built from the CORS_ORIGIN environment variable.
+ * Falls back to localhost:5173 for local development if nothing is set.
+ */
+const allowedOrigins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(',').map((o) => o.trim())
+  : ['http://localhost:5173'];
+
 const corsOptions = {
-  origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
-  credentials: true
+  origin: (origin, callback) => {
+    // Allow requests with no origin (e.g. server-to-server, curl, mobile apps)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(
+      new Error(`CORS policy: origin "${origin}" is not allowed.`)
+    );
+  },
+  credentials: true,
 };
 
 app.use(cors(corsOptions));
