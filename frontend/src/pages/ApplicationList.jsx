@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { applicationAPI } from '../services/api';
 
@@ -9,21 +10,42 @@ import { applicationAPI } from '../services/api';
 function ApplicationList() {
   const { t } = useTranslation();
 
+  const [searchParams, setSearchParams] = useSearchParams();
   const [applications, setApplications] = useState([]);
-  const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [pageInput, setPageInput] = useState('1');
-
+  const [pageInput, setPageInput] = useState(() => searchParams.get('page') || '1');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-
-  const [sortBy, setSortBy] = useState('status'); // default: unhandled first
-  const [filterStatus, setFilterStatus] = useState('all');
-  const [filterCompetence, setFilterCompetence] = useState('all');
-  const [minExperience, setMinExperience] = useState('');
-  const [availFrom, setAvailFrom] = useState('');
-  const [availTo, setAvailTo] = useState('');
   const [competences, setCompetences] = useState([]);
+
+  // Derive all filter/sort/page values from URL
+  const sortBy           = searchParams.get('sortBy')        || 'status';
+  const filterStatus     = searchParams.get('status')        || 'all';
+  const filterCompetence = searchParams.get('competence')    || 'all';
+  const minExperience    = searchParams.get('minExperience') || '';
+  const availFrom        = searchParams.get('availFrom')     || '';
+  const availTo          = searchParams.get('availTo')       || '';
+  const page             = Number(searchParams.get('page'))  || 1;
+
+  // Update a single filter param and reset page to 1
+  function setFilter(key, value, defaultVal) {
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev);
+      if (!value || value === defaultVal) next.delete(key); else next.set(key, value);
+      next.delete('page');
+      return next;
+    }, { replace: true });
+  }
+
+  // Navigate to a specific page in the URL
+  function goToPage(p) {
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev);
+      if (p <= 1) next.delete('page'); else next.set('page', String(p));
+      return next;
+    }, { replace: true });
+    setPageInput(String(p));
+  }
 
   // Fetch competencies once on mount
   useEffect(() => {
@@ -35,16 +57,16 @@ function ApplicationList() {
       .catch(() => {});
   }, []);
 
-  // Fetch from page 1 on mount and whenever filters or sort change
+  // Re-fetch whenever URL params change
   useEffect(() => {
-    fetchApplications(1);
-  }, [sortBy, filterStatus, filterCompetence, minExperience, availFrom, availTo]);
+    fetchApplications();
+  }, [searchParams]);
 
-  async function fetchApplications(targetPage = page) {
+  async function fetchApplications() {
     setLoading(true);
     setError('');
     try {
-      const response = await applicationAPI.getApplications(targetPage, 10, true, {
+      const response = await applicationAPI.getApplications(page, 10, true, {
         sortBy,
         competence:    filterCompetence !== 'all' ? filterCompetence : undefined,
         status:        filterStatus     !== 'all' ? filterStatus     : undefined,
@@ -57,8 +79,7 @@ function ApplicationList() {
       const apps = payload?.applications;
 
       setApplications(Array.isArray(apps) ? apps : []);
-      setPage(payload?.page || targetPage);
-      setPageInput(String(payload?.page || targetPage));
+      setPageInput(String(payload?.page || page));
       setTotalPages(payload?.totalPages || 1);
     } catch (err) {
       setError(t('applicationList.loadingApplications') + ' ' + err.message);
@@ -101,7 +122,7 @@ function ApplicationList() {
         <h2 className="text-3xl font-semibold text-slate-800">{t('applicationList.title')}</h2>
         <div className="flex gap-3">
           <button
-            onClick={() => fetchApplications(page)}
+            onClick={() => fetchApplications()}
             className="bg-blue-500 text-white border-0 px-6 py-3 text-base font-medium rounded-md cursor-pointer transition-colors hover:bg-blue-600"
             title="Refresh"
           >
@@ -125,7 +146,7 @@ function ApplicationList() {
               <label className="font-medium text-gray-700 text-xs uppercase tracking-wide">{t('applicationList.sortBy')}</label>
               <select
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
+                onChange={(e) => setFilter('sortBy', e.target.value, 'status')}
                 className="px-3 py-2 text-sm border border-gray-300 rounded-md bg-white cursor-pointer min-w-[180px] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               >
                 <option value="status">Status (unhandled first)</option>
@@ -138,7 +159,7 @@ function ApplicationList() {
               <label className="font-medium text-gray-700 text-xs uppercase tracking-wide">Status</label>
               <select
                 value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
+                onChange={(e) => setFilter('status', e.target.value, 'all')}
                 className="px-3 py-2 text-sm border border-gray-300 rounded-md bg-white cursor-pointer min-w-[150px] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               >
                 <option value="all">{t('applicationList.allApplications')}</option>
@@ -153,7 +174,7 @@ function ApplicationList() {
               <label className="font-medium text-gray-700 text-xs uppercase tracking-wide">Competence</label>
               <select
                 value={filterCompetence}
-                onChange={(e) => setFilterCompetence(e.target.value)}
+                onChange={(e) => setFilter('competence', e.target.value, 'all')}
                 className="px-3 py-2 text-sm border border-gray-300 rounded-md bg-white cursor-pointer min-w-[180px] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               >
                 <option value="all">All competences</option>
@@ -172,7 +193,7 @@ function ApplicationList() {
                 step="0.5"
                 placeholder="Any"
                 value={minExperience}
-                onChange={(e) => setMinExperience(e.target.value)}
+                onChange={(e) => setFilter('minExperience', e.target.value, '')}
                 className="px-3 py-2 text-sm border border-gray-300 rounded-md bg-white w-[110px] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               />
             </div>
@@ -184,14 +205,14 @@ function ApplicationList() {
                 <input
                   type="date"
                   value={availFrom}
-                  onChange={(e) => setAvailFrom(e.target.value)}
+                  onChange={(e) => setFilter('availFrom', e.target.value, '')}
                   className="px-3 py-2 text-sm border border-gray-300 rounded-md bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                 />
                 <span className="text-gray-400 text-sm">–</span>
                 <input
                   type="date"
                   value={availTo}
-                  onChange={(e) => setAvailTo(e.target.value)}
+                  onChange={(e) => setFilter('availTo', e.target.value, '')}
                   className="px-3 py-2 text-sm border border-gray-300 rounded-md bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                 />
               </div>
@@ -200,7 +221,13 @@ function ApplicationList() {
             {/* Clear filters */}
             {(filterStatus !== 'all' || filterCompetence !== 'all' || minExperience !== '' || availFrom !== '' || availTo !== '') && (
               <button
-                onClick={() => { setFilterStatus('all'); setFilterCompetence('all'); setMinExperience(''); setAvailFrom(''); setAvailTo(''); }}
+                onClick={() => {
+                  setSearchParams(prev => {
+                    const next = new URLSearchParams(prev);
+                    ['status', 'competence', 'minExperience', 'availFrom', 'availTo', 'page'].forEach(k => next.delete(k));
+                    return next;
+                  }, { replace: true });
+                }}
                 className="px-3 py-2 text-sm text-gray-500 border border-gray-300 rounded-md hover:bg-gray-50 self-end"
               >
                 Clear filters
@@ -291,7 +318,7 @@ function ApplicationList() {
               <div className="flex justify-center items-center gap-3 mt-10">
                 <button
                   disabled={page <= 1}
-                  onClick={() => fetchApplications(page - 1)}
+                  onClick={() => goToPage(page - 1)}
                   className="px-4 py-2 rounded border disabled:opacity-40"
                 >
                   Prev
@@ -306,13 +333,13 @@ function ApplicationList() {
                     onChange={(e) => setPageInput(e.target.value)}
                     onBlur={() => {
                       const val = Number(pageInput);
-                      if (val >= 1 && val <= totalPages) fetchApplications(val);
+                      if (val >= 1 && val <= totalPages) goToPage(val);
                       else setPageInput(String(page));
                     }}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
                         const val = Number(pageInput);
-                        if (val >= 1 && val <= totalPages) fetchApplications(val);
+                        if (val >= 1 && val <= totalPages) goToPage(val);
                         else setPageInput(String(page));
                         e.target.blur();
                       }
@@ -323,7 +350,7 @@ function ApplicationList() {
                 </div>
                 <button
                   disabled={page >= totalPages}
-                  onClick={() => fetchApplications(page + 1)}
+                  onClick={() => goToPage(page + 1)}
                   className="px-4 py-2 rounded border disabled:opacity-40"
                 >
                   Next
