@@ -21,24 +21,37 @@ function ApplicationList() {
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterCompetence, setFilterCompetence] = useState('all');
   const [minExperience, setMinExperience] = useState('');
+  const [availFrom, setAvailFrom] = useState('');
+  const [availTo, setAvailTo] = useState('');
   const [competences, setCompetences] = useState([]);
 
+  // Fetch competencies once on mount
   useEffect(() => {
-    fetchApplications(1);
     applicationAPI.getCompetencies()
       .then(res => {
-        // API may return { data: { data: [...] } } or { data: [...] }
         const raw = res?.data?.data ?? res?.data ?? [];
         setCompetences(Array.isArray(raw) ? raw : []);
       })
       .catch(() => {});
   }, []);
 
+  // Fetch from page 1 on mount and whenever filters or sort change
+  useEffect(() => {
+    fetchApplications(1);
+  }, [sortBy, filterStatus, filterCompetence, minExperience, availFrom, availTo]);
+
   async function fetchApplications(targetPage = page) {
     setLoading(true);
     setError('');
     try {
-      const response = await applicationAPI.getApplications(targetPage, 10, true);
+      const response = await applicationAPI.getApplications(targetPage, 10, true, {
+        sortBy,
+        competence:    filterCompetence !== 'all' ? filterCompetence : undefined,
+        status:        filterStatus     !== 'all' ? filterStatus     : undefined,
+        minExperience: minExperience || undefined,
+        availFrom:     availFrom     || undefined,
+        availTo:       availTo       || undefined,
+      });
 
       const payload = response?.data?.data;
       const apps = payload?.applications;
@@ -63,68 +76,6 @@ function ApplicationList() {
     } catch (err) {
       setError('Failed to update status: ' + err.message);
     }
-  }
-
-  const STATUS_ORDER = { unhandled: 0, accepted: 1, rejected: 2 };
-
-  function totalExperience(app) {
-    return (app.competenceProfiles || []).reduce((sum, cp) => sum + (Number(cp.yearsOfExperience) || 0), 0);
-  }
-
-  function sortApplications(apps) {
-    const sorted = [...apps];
-    switch (sortBy) {
-      case 'name':
-        return sorted.sort((a, b) => (a.fullName || '').localeCompare(b.fullName || ''));
-      case 'status':
-        // Triage order: unhandled first, then accepted, then rejected
-        return sorted.sort((a, b) =>
-          (STATUS_ORDER[a.status] ?? 0) - (STATUS_ORDER[b.status] ?? 0)
-        );
-      case 'experience':
-        return sorted.sort((a, b) => totalExperience(b) - totalExperience(a));
-      default:
-        return sorted;
-    }
-  }
-
-  function filterApplications(apps) {
-    return apps.filter(app => {
-      // Status filter
-      if (filterStatus !== 'all' && app.status !== filterStatus) return false;
-
-      // Specific competence filter — match by name (competenceName is always present)
-      if (filterCompetence !== 'all') {
-        const has = (app.competenceProfiles || []).some(
-          cp => cp.competenceName === filterCompetence
-        );
-        if (!has) return false;
-      }
-
-      // Minimum total experience filter
-      if (minExperience !== '' && !Number.isNaN(Number(minExperience))) {
-        if (totalExperience(app) < Number(minExperience)) return false;
-      }
-
-      return true;
-    });
-  }
-
-  function mergeCompetences(profiles) {
-    const map = {};
-    for (const cp of profiles || []) {
-      const key = (cp.competenceName || 'Unknown').toLowerCase();
-      if (map[key]) {
-        map[key] = { ...map[key], yearsOfExperience: map[key].yearsOfExperience + (Number(cp.yearsOfExperience) || 0) };
-      } else {
-        map[key] = { ...cp, yearsOfExperience: Number(cp.yearsOfExperience) || 0 };
-      }
-    }
-    return Object.values(map);
-  }
-
-  function getDisplayApplications() {
-    return sortApplications(filterApplications(applications));
   }
 
   function formatDate(dateString) {
@@ -226,10 +177,30 @@ function ApplicationList() {
               />
             </div>
 
+            {/* Availability overlap */}
+            <div className="flex flex-col gap-1">
+              <label className="font-medium text-gray-700 text-xs uppercase tracking-wide">Available between</label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="date"
+                  value={availFrom}
+                  onChange={(e) => setAvailFrom(e.target.value)}
+                  className="px-3 py-2 text-sm border border-gray-300 rounded-md bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                />
+                <span className="text-gray-400 text-sm">–</span>
+                <input
+                  type="date"
+                  value={availTo}
+                  onChange={(e) => setAvailTo(e.target.value)}
+                  className="px-3 py-2 text-sm border border-gray-300 rounded-md bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                />
+              </div>
+            </div>
+
             {/* Clear filters */}
-            {(filterStatus !== 'all' || filterCompetence !== 'all' || minExperience !== '') && (
+            {(filterStatus !== 'all' || filterCompetence !== 'all' || minExperience !== '' || availFrom !== '' || availTo !== '') && (
               <button
-                onClick={() => { setFilterStatus('all'); setFilterCompetence('all'); setMinExperience(''); }}
+                onClick={() => { setFilterStatus('all'); setFilterCompetence('all'); setMinExperience(''); setAvailFrom(''); setAvailTo(''); }}
                 className="px-3 py-2 text-sm text-gray-500 border border-gray-300 rounded-md hover:bg-gray-50 self-end"
               >
                 Clear filters
@@ -237,7 +208,7 @@ function ApplicationList() {
             )}
           </div>
 
-          {getDisplayApplications().length === 0 ? (
+          {applications.length === 0 ? (
             <div className="bg-white py-16 px-8 rounded-lg shadow-md text-center">
               <p className="text-xl font-semibold text-slate-800 mb-2">{t('applicationList.noApplications')}</p>
               <p className="text-gray-600 text-sm">{t('applicationList.noApplicationsDesc')}</p>
@@ -245,7 +216,7 @@ function ApplicationList() {
           ) : (
             <>
               <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                {getDisplayApplications().map((app) => (
+                {applications.map((app) => (
                   <div key={app.applicationId} className="bg-white rounded-lg shadow-md overflow-hidden transition-all hover:-translate-y-1 hover:shadow-lg">
                     <div className="p-6 border-b border-gray-200 flex justify-between items-start gap-4">
                       <div className="flex-1">
@@ -266,7 +237,7 @@ function ApplicationList() {
                       <h4 className="text-base font-semibold text-gray-700 mb-4">{t('applicationList.competenceProfile')}</h4>
                       {app.competenceProfiles?.length > 0 ? (
                         <ul className="list-none flex flex-col gap-3">
-                          {mergeCompetences(app.competenceProfiles).map((cp, idx) => (
+                          {(app.competenceProfiles || []).map((cp, idx) => (
                             <li key={idx} className="flex justify-between items-center px-3 py-3 bg-gray-50 rounded-md border-l-4 border-blue-500">
                               <span className="font-medium text-slate-800">{cp.competenceName || 'Unknown'}</span>
                               <span className="text-gray-600 text-sm bg-white px-3 py-1 rounded-xl">

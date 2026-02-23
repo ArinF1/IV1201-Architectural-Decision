@@ -1,4 +1,5 @@
-const { Person, CompetenceProfile, Competence, Availability } = require("../persistence");
+const { Op } = require('sequelize');
+const { Person, CompetenceProfile, Competence, Availability, sequelize: db } = require("../persistence");
 const { HttpError } = require('../../errors/httpsError');
 
 /**
@@ -91,20 +92,67 @@ async function submitApplication(applicationData, transaction) {
 }
 
 /**
- * Lists applicants from the database via applicantdata through their competence and availability data.
- * @param {number} limit - The maximum number of applications to retrieve.
- * @param {number} offset - How many applicants to skip (pagination).
- * @param {boolean} hideEmpty - hides applicants with no competence profiles or availabilities when true, shows all applicants when false.
- * 
+ * Lists applicants from the database with optional filtering.
+ * Pagination is handled by the service layer after sorting.
+ * @param {Object} filters - Optional filter criteria.
+ * @param {string} [filters.competenceName] - Filter by applicants who have this competence.
+ * @param {number} [filters.minExperience] - Filter by minimum total years of experience.
+ * @param {string} [filters.availFrom] - Filter by availability start (ISO date string).
+ * @param {string} [filters.availTo] - Filter by availability end (ISO date string).
+ * @param {boolean} hideEmpty - Hide applicants with no competence profiles or availabilities.
+ * @returns {Promise<Array>} Array of application objects.
  */
-async function listApplications(limit = 10, offset = 0, hideEmpty = true) {
+async function listApplications(filters = {}, hideEmpty = true) {
+  const { competenceName, minExperience, availFrom, availTo } = filters;
+
   const whereClause = { role_id: 2 };
+  const andConditions = [];
+
+  // Filter: only persons who have the specified competence
+  if (competenceName) {
+    andConditions.push(
+      db.literal(`EXISTS (
+        SELECT 1 FROM competence_profile cp2
+        JOIN competence c2 ON cp2.competence_id = c2.competence_id
+        WHERE cp2.person_id = "Person"."person_id"
+        AND c2.name = ${db.escape(competenceName)}
+      )`)
+    );
+  }
+
+  // Filter: only persons whose total experience meets the minimum
+  if (minExperience !== undefined && minExperience !== '' && !isNaN(Number(minExperience))) {
+    andConditions.push(
+      db.literal(`(
+        SELECT COALESCE(SUM(cp3.years_of_experience), 0)
+        FROM competence_profile cp3
+        WHERE cp3.person_id = "Person"."person_id"
+      ) >= ${parseFloat(minExperience)}`)
+    );
+  }
+
+  // Filter: only persons with an availability period overlapping the given range
+  if (availFrom || availTo) {
+    const conditions = [`av2.person_id = "Person"."person_id"`];
+    if (availFrom) conditions.push(`av2.to_date >= ${db.escape(availFrom)}`);
+    if (availTo)   conditions.push(`av2.from_date <= ${db.escape(availTo)}`);
+    andConditions.push(
+      db.literal(`EXISTS (
+        SELECT 1 FROM availability av2
+        WHERE ${conditions.join(' AND ')}
+      )`)
+    );
+  }
+
+  if (andConditions.length > 0) {
+    whereClause[Op.and] = andConditions;
+  }
 
   const baseInclude = [
     {
       model: CompetenceProfile,
       as: "competenceProfiles",
-      required: hideEmpty, // only includes persons that HAVE competenceProfiles when hideEmpty=true
+      required: hideEmpty,
       attributes: ["competence_profile_id", "competence_id", "years_of_experience"],
       include: [
         {
@@ -117,28 +165,19 @@ async function listApplications(limit = 10, offset = 0, hideEmpty = true) {
     {
       model: Availability,
       as: "availabilities",
-      required: hideEmpty, // only includes persons that HAVE availabilities when hideEmpty=true
+      required: hideEmpty,
       attributes: ["availability_id", "from_date", "to_date"],
     },
   ];
-
-  const totalCount = await Person.count({
-    where: whereClause,
-    distinct: true,
-    col: "person_id",
-    include: baseInclude,
-  });
 
   const persons = await Person.findAll({
     where: whereClause,
     attributes: ["person_id", "name", "surname", "email", "pnr"],
     include: baseInclude,
-    limit,
-    offset,
-    order: [["person_id", "DESC"]],
+    order: [["person_id", "ASC"]],
   });
 
-  const applications = persons.map((person) => {
+  return persons.map((person) => {
     const plain = person.get({ plain: true });
     return {
       application_id: plain.person_id,
@@ -146,8 +185,6 @@ async function listApplications(limit = 10, offset = 0, hideEmpty = true) {
       status: "unhandled",
     };
   });
-
-  return { totalCount, applications };
 }
 
 /**

@@ -40,7 +40,7 @@ class DecisionMakingService {
      * @returns {Object} Results of processing
      */
     async processUnhandledApplications() {
-        const applications = await applicationRepo.listApplications(1000);
+        const applications = await applicationRepo.listApplications({}, false);
         const unhandled = applications.filter(function(app) {
             return app.status === 'unhandled';
         });
