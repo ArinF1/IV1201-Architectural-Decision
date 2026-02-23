@@ -12,15 +12,26 @@ function ApplicationList() {
   const [applications, setApplications] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [pageInput, setPageInput] = useState('1');
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const [sortBy, setSortBy] = useState('name'); // date removed (no createdAt)
+  const [sortBy, setSortBy] = useState('status'); // default: unhandled first
   const [filterStatus, setFilterStatus] = useState('all');
+  const [filterCompetence, setFilterCompetence] = useState('all');
+  const [minExperience, setMinExperience] = useState('');
+  const [competences, setCompetences] = useState([]);
 
   useEffect(() => {
     fetchApplications(1);
+    applicationAPI.getCompetencies()
+      .then(res => {
+        // API may return { data: { data: [...] } } or { data: [...] }
+        const raw = res?.data?.data ?? res?.data ?? [];
+        setCompetences(Array.isArray(raw) ? raw : []);
+      })
+      .catch(() => {});
   }, []);
 
   async function fetchApplications(targetPage = page) {
@@ -34,6 +45,7 @@ function ApplicationList() {
 
       setApplications(Array.isArray(apps) ? apps : []);
       setPage(payload?.page || targetPage);
+      setPageInput(String(payload?.page || targetPage));
       setTotalPages(payload?.totalPages || 1);
     } catch (err) {
       setError(t('applicationList.loadingApplications') + ' ' + err.message);
@@ -53,21 +65,62 @@ function ApplicationList() {
     }
   }
 
+  const STATUS_ORDER = { unhandled: 0, accepted: 1, rejected: 2 };
+
+  function totalExperience(app) {
+    return (app.competenceProfiles || []).reduce((sum, cp) => sum + (Number(cp.yearsOfExperience) || 0), 0);
+  }
+
   function sortApplications(apps) {
     const sorted = [...apps];
     switch (sortBy) {
       case 'name':
         return sorted.sort((a, b) => (a.fullName || '').localeCompare(b.fullName || ''));
       case 'status':
-        return sorted.sort((a, b) => (a.status || '').localeCompare(b.status || ''));
+        // Triage order: unhandled first, then accepted, then rejected
+        return sorted.sort((a, b) =>
+          (STATUS_ORDER[a.status] ?? 0) - (STATUS_ORDER[b.status] ?? 0)
+        );
+      case 'experience':
+        return sorted.sort((a, b) => totalExperience(b) - totalExperience(a));
       default:
         return sorted;
     }
   }
 
   function filterApplications(apps) {
-    if (filterStatus === 'all') return apps;
-    return apps.filter(app => app.status === filterStatus);
+    return apps.filter(app => {
+      // Status filter
+      if (filterStatus !== 'all' && app.status !== filterStatus) return false;
+
+      // Specific competence filter — match by name (competenceName is always present)
+      if (filterCompetence !== 'all') {
+        const has = (app.competenceProfiles || []).some(
+          cp => cp.competenceName === filterCompetence
+        );
+        if (!has) return false;
+      }
+
+      // Minimum total experience filter
+      if (minExperience !== '' && !Number.isNaN(Number(minExperience))) {
+        if (totalExperience(app) < Number(minExperience)) return false;
+      }
+
+      return true;
+    });
+  }
+
+  function mergeCompetences(profiles) {
+    const map = {};
+    for (const cp of profiles || []) {
+      const key = (cp.competenceName || 'Unknown').toLowerCase();
+      if (map[key]) {
+        map[key] = { ...map[key], yearsOfExperience: map[key].yearsOfExperience + (Number(cp.yearsOfExperience) || 0) };
+      } else {
+        map[key] = { ...cp, yearsOfExperience: Number(cp.yearsOfExperience) || 0 };
+      }
+    }
+    return Object.values(map);
   }
 
   function getDisplayApplications() {
@@ -115,25 +168,27 @@ function ApplicationList() {
 
       {!error && (
         <>
-          <div className="bg-white p-6 rounded-lg shadow-md mb-8 flex gap-8 flex-wrap">
-            <div className="flex items-center gap-3">
-              <label className="font-medium text-gray-700 text-sm">{t('applicationList.sortBy')}</label>
+          <div className="bg-white p-6 rounded-lg shadow-md mb-8 flex gap-6 flex-wrap items-end">
+            {/* Sort */}
+            <div className="flex flex-col gap-1">
+              <label className="font-medium text-gray-700 text-xs uppercase tracking-wide">{t('applicationList.sortBy')}</label>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="px-4 py-2 text-sm border border-gray-300 rounded-md bg-white cursor-pointer min-w-[180px] focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                className="px-3 py-2 text-sm border border-gray-300 rounded-md bg-white cursor-pointer min-w-[180px] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               >
-                <option value="name">{t('applicationList.applicantName')}</option>
-                <option value="status">{t('applicationList.status')}</option>
+                <option value="status">Status (unhandled first)</option>
+                <option value="experience">Total Experience (most first)</option>
               </select>
             </div>
 
-            <div className="flex items-center gap-3">
-              <label className="font-medium text-gray-700 text-sm">{t('applicationList.filter')}</label>
+            {/* Status filter */}
+            <div className="flex flex-col gap-1">
+              <label className="font-medium text-gray-700 text-xs uppercase tracking-wide">Status</label>
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
-                className="px-4 py-2 text-sm border border-gray-300 rounded-md bg-white cursor-pointer min-w-[180px] focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                className="px-3 py-2 text-sm border border-gray-300 rounded-md bg-white cursor-pointer min-w-[150px] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               >
                 <option value="all">{t('applicationList.allApplications')}</option>
                 <option value="unhandled">{t('applicationList.unhandled')}</option>
@@ -141,6 +196,45 @@ function ApplicationList() {
                 <option value="rejected">{t('applicationList.rejected')}</option>
               </select>
             </div>
+
+            {/* Competence filter */}
+            <div className="flex flex-col gap-1">
+              <label className="font-medium text-gray-700 text-xs uppercase tracking-wide">Competence</label>
+              <select
+                value={filterCompetence}
+                onChange={(e) => setFilterCompetence(e.target.value)}
+                className="px-3 py-2 text-sm border border-gray-300 rounded-md bg-white cursor-pointer min-w-[180px] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              >
+                <option value="all">All competences</option>
+                {competences.map(c => (
+                  <option key={c.competenceId ?? c.name} value={c.name}>{c.name}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Min experience */}
+            <div className="flex flex-col gap-1">
+              <label className="font-medium text-gray-700 text-xs uppercase tracking-wide">Min. Experience (yrs)</label>
+              <input
+                type="number"
+                min="0"
+                step="0.5"
+                placeholder="Any"
+                value={minExperience}
+                onChange={(e) => setMinExperience(e.target.value)}
+                className="px-3 py-2 text-sm border border-gray-300 rounded-md bg-white w-[110px] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              />
+            </div>
+
+            {/* Clear filters */}
+            {(filterStatus !== 'all' || filterCompetence !== 'all' || minExperience !== '') && (
+              <button
+                onClick={() => { setFilterStatus('all'); setFilterCompetence('all'); setMinExperience(''); }}
+                className="px-3 py-2 text-sm text-gray-500 border border-gray-300 rounded-md hover:bg-gray-50 self-end"
+              >
+                Clear filters
+              </button>
+            )}
           </div>
 
           {getDisplayApplications().length === 0 ? (
@@ -172,7 +266,7 @@ function ApplicationList() {
                       <h4 className="text-base font-semibold text-gray-700 mb-4">{t('applicationList.competenceProfile')}</h4>
                       {app.competenceProfiles?.length > 0 ? (
                         <ul className="list-none flex flex-col gap-3">
-                          {app.competenceProfiles.map((cp, idx) => (
+                          {mergeCompetences(app.competenceProfiles).map((cp, idx) => (
                             <li key={idx} className="flex justify-between items-center px-3 py-3 bg-gray-50 rounded-md border-l-4 border-blue-500">
                               <span className="font-medium text-slate-800">{cp.competenceName || 'Unknown'}</span>
                               <span className="text-gray-600 text-sm bg-white px-3 py-1 rounded-xl">
@@ -231,9 +325,31 @@ function ApplicationList() {
                 >
                   Prev
                 </button>
-                <span className="text-sm text-gray-700">
-                  {page} / {totalPages}
-                </span>
+                <div className="flex items-center gap-2 text-sm text-gray-700">
+                  <span>Page</span>
+                  <input
+                    type="number"
+                    min={1}
+                    max={totalPages}
+                    value={pageInput}
+                    onChange={(e) => setPageInput(e.target.value)}
+                    onBlur={() => {
+                      const val = Number(pageInput);
+                      if (val >= 1 && val <= totalPages) fetchApplications(val);
+                      else setPageInput(String(page));
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        const val = Number(pageInput);
+                        if (val >= 1 && val <= totalPages) fetchApplications(val);
+                        else setPageInput(String(page));
+                        e.target.blur();
+                      }
+                    }}
+                    className="w-16 px-2 py-1 text-center border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+                  />
+                  <span>of {totalPages}</span>
+                </div>
                 <button
                   disabled={page >= totalPages}
                   onClick={() => fetchApplications(page + 1)}
