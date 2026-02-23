@@ -1,4 +1,4 @@
-const applicationService = require('../model/service/applicationService');
+const applicationService = require('../model/service/ApplicationService');
 const decisionMakingService = require('../model/service/decisionMakingService');
 const { HttpError } = require('../errors/httpsError');
 
@@ -49,8 +49,17 @@ exports.getApplications = async (req, res, next) => {
         const page = req.query.page;
         const pageSize = req.query.pageSize;
         const hideEmpty = req.query.hideEmpty !== 'false';
+        const sortBy = req.query.sortBy || 'status';
 
-        const result = await applicationService.getApplicationsPage(page, pageSize, hideEmpty);
+        const filters = {
+            status: req.query.status || 'all',
+            competenceName: req.query.competence || undefined,
+            minExperience: req.query.minExperience || undefined,
+            availFrom: req.query.availFrom || undefined,
+            availTo: req.query.availTo || undefined,
+        };
+
+        const result = await applicationService.getApplicationsPage(page, pageSize, hideEmpty, filters, sortBy);
         res.status(200).json({ success: true, data: result });
     } catch (error) {
         next(error);

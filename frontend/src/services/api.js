@@ -61,11 +61,28 @@ export const applicationAPI = {
   },
 
   /**
-   * Get all applications
-   * @returns {Promise} Response with list of applications
+   * Get all applications with optional filters and sort
+   * @param {number} page - Page number (1-indexed)
+   * @param {number} pageSize - Items per page
+   * @param {boolean} hideEmpty - Hide empty applications
+   * @param {Object} filters - { sortBy, competence, status, minExperience, availFrom, availTo }
+   * @returns {Promise} Response with paginated applications
    */
-  getApplications: function (page = 1, pageSize = 10, hideEmpty = true) {
-  return apiClient.get('/applications', { params: { page, pageSize, hideEmpty } });
+  getApplications: function (page = 1, pageSize = 10, hideEmpty = true, filters = {}) {
+    const { sortBy, competence, status, minExperience, availFrom, availTo } = filters;
+    return apiClient.get('/applications', {
+      params: {
+        page,
+        pageSize,
+        hideEmpty,
+        ...(sortBy              && { sortBy }),
+        ...(competence          && { competence }),
+        ...(status && status !== 'all' && { status }),
+        ...(minExperience       && { minExperience }),
+        ...(availFrom           && { availFrom }),
+        ...(availTo             && { availTo }),
+      },
+    });
   },
 
   /**
