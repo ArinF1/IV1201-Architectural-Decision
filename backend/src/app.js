@@ -24,6 +24,7 @@ const allowedOrigins = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(',').map((o) => o.trim())
   : ['http://localhost:5173'];
 
+
 const corsOptions = {
   origin: (origin, callback) => {
     // Allow requests with no origin (e.g. server-to-server, curl, mobile apps)
