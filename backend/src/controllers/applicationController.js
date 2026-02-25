@@ -68,6 +68,31 @@ exports.getApplications = async (req, res, next) => {
 };
 
 /**
+ * Updates the status of a specific application (accepted/rejected/unhandled).
+ * Recruiter-only (role_id 1).
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
+exports.patchApplicationStatus = async (req, res, next) => {
+    try {
+        const roleId = req.user && req.user.role_id;
+        if (roleId !== 1) {
+            throw new HttpError(403, 'Forbidden', 'FORBIDDEN');
+        }
+
+        const applicationId = req.params.id;
+        const newStatus = req.body.status;
+
+        const result = await applicationService.updateStatus(applicationId, newStatus);
+        res.status(200).json({ success: true, data: result });
+    } catch (error) {
+        next(error);
+    }
+};
+
+
+/**
  * Retrieves all available competencies.
  * 
  * @param {import('express').Request} req - The Express request object.

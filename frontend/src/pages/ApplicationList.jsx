@@ -19,13 +19,13 @@ function ApplicationList() {
   const [competences, setCompetences] = useState([]);
 
   // Derive all filter/sort/page values from URL
-  const sortBy           = searchParams.get('sortBy')        || 'status';
-  const filterStatus     = searchParams.get('status')        || 'all';
-  const filterCompetence = searchParams.get('competence')    || 'all';
-  const minExperience    = searchParams.get('minExperience') || '';
-  const availFrom        = searchParams.get('availFrom')     || '';
-  const availTo          = searchParams.get('availTo')       || '';
-  const page             = Number(searchParams.get('page'))  || 1;
+  const sortBy = searchParams.get('sortBy') || 'status';
+  const filterStatus = searchParams.get('status') || 'all';
+  const filterCompetence = searchParams.get('competence') || 'all';
+  const minExperience = searchParams.get('minExperience') || '';
+  const availFrom = searchParams.get('availFrom') || '';
+  const availTo = searchParams.get('availTo') || '';
+  const page = Number(searchParams.get('page')) || 1;
 
   // Update a single filter param and reset page to 1
   function setFilter(key, value, defaultVal) {
@@ -54,7 +54,7 @@ function ApplicationList() {
         const raw = res?.data?.data ?? res?.data ?? [];
         setCompetences(Array.isArray(raw) ? raw : []);
       })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   // Re-fetch whenever URL params change
@@ -68,11 +68,11 @@ function ApplicationList() {
     try {
       const response = await applicationAPI.getApplications(page, 10, true, {
         sortBy,
-        competence:    filterCompetence !== 'all' ? filterCompetence : undefined,
-        status:        filterStatus     !== 'all' ? filterStatus     : undefined,
+        competence: filterCompetence !== 'all' ? filterCompetence : undefined,
+        status: filterStatus !== 'all' ? filterStatus : undefined,
         minExperience: minExperience || undefined,
-        availFrom:     availFrom     || undefined,
-        availTo:       availTo       || undefined,
+        availFrom: availFrom || undefined,
+        availTo: availTo || undefined,
       });
 
       const payload = response?.data?.data;
@@ -91,9 +91,7 @@ function ApplicationList() {
   async function handleStatusUpdate(applicationId, newStatus) {
     try {
       await applicationAPI.updateApplicationStatus(applicationId, newStatus);
-      setApplications(prev =>
-        prev.map(app => (app.applicationId === applicationId ? { ...app, status: newStatus } : app))
-      );
+      await fetchApplications();
     } catch (err) {
       setError('Failed to update status: ' + err.message);
     }
@@ -251,10 +249,10 @@ function ApplicationList() {
                         <p className="text-gray-400 text-xs">Person Number: {app.personNumber}</p>
                       </div>
                       <span className={`px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap ${app.status === 'accepted'
-                          ? 'bg-green-100 text-green-800'
-                          : app.status === 'rejected'
-                            ? 'bg-red-100 text-red-800'
-                            : 'bg-yellow-100 text-yellow-800'
+                        ? 'bg-green-100 text-green-800'
+                        : app.status === 'rejected'
+                          ? 'bg-red-100 text-red-800'
+                          : 'bg-yellow-100 text-yellow-800'
                         }`}>
                         {(app.status || 'unhandled').charAt(0).toUpperCase() + (app.status || 'unhandled').slice(1)}
                       </span>
@@ -295,22 +293,57 @@ function ApplicationList() {
                       )}
                     </div>
 
-                    {(app.status || 'unhandled') === 'unhandled' && (
-                      <div className="p-6 border-b border-gray-200 flex gap-3">
-                        <button
-                          onClick={() => handleStatusUpdate(app.applicationId, 'accepted')}
-                          className="flex-1 bg-green-600 text-white border-0 px-4 py-2 text-sm font-medium rounded-md cursor-pointer transition-colors hover:bg-green-700"
-                        >
-                          {t('applicationList.accept')}
-                        </button>
-                        <button
-                          onClick={() => handleStatusUpdate(app.applicationId, 'rejected')}
-                          className="flex-1 bg-red-600 text-white border-0 px-4 py-2 text-sm font-medium rounded-md cursor-pointer transition-colors hover:bg-red-700"
-                        >
-                          {t('applicationList.reject')}
-                        </button>
-                      </div>
-                    )}
+                    {/* Action buttons - different buttons depending on current status */}
+                    <div className="p-6 flex gap-3">
+                      {(app.status || 'unhandled') === 'unhandled' && (
+                        <>
+                          <button
+                            onClick={() => handleStatusUpdate(app.applicationId, 'accepted')}
+                            className="flex-1 bg-green-600 text-white border-0 px-4 py-2 text-sm font-medium rounded-md cursor-pointer transition-colors hover:bg-green-700"
+                          >
+                            {t('applicationList.accept')}
+                          </button>
+                          <button
+                            onClick={() => handleStatusUpdate(app.applicationId, 'rejected')}
+                            className="flex-1 bg-red-600 text-white border-0 px-4 py-2 text-sm font-medium rounded-md cursor-pointer transition-colors hover:bg-red-700"
+                          >
+                            {t('applicationList.reject')}
+                          </button>
+                        </>
+                      )}
+                      {app.status === 'accepted' && (
+                        <>
+                          <button
+                            onClick={() => handleStatusUpdate(app.applicationId, 'rejected')}
+                            className="flex-1 bg-red-600 text-white border-0 px-4 py-2 text-sm font-medium rounded-md cursor-pointer transition-colors hover:bg-red-700"
+                          >
+                            {t('applicationList.reject')}
+                          </button>
+                          <button
+                            onClick={() => handleStatusUpdate(app.applicationId, 'unhandled')}
+                            className="flex-1 bg-gray-500 text-white border-0 px-4 py-2 text-sm font-medium rounded-md cursor-pointer transition-colors hover:bg-gray-600"
+                          >
+                            Mark Unhandled
+                          </button>
+                        </>
+                      )}
+                      {app.status === 'rejected' && (
+                        <>
+                          <button
+                            onClick={() => handleStatusUpdate(app.applicationId, 'accepted')}
+                            className="flex-1 bg-green-600 text-white border-0 px-4 py-2 text-sm font-medium rounded-md cursor-pointer transition-colors hover:bg-green-700"
+                          >
+                            {t('applicationList.accept')}
+                          </button>
+                          <button
+                            onClick={() => handleStatusUpdate(app.applicationId, 'unhandled')}
+                            className="flex-1 bg-gray-500 text-white border-0 px-4 py-2 text-sm font-medium rounded-md cursor-pointer transition-colors hover:bg-gray-600"
+                          >
+                            Mark Unhandled
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>

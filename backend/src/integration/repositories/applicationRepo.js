@@ -3,6 +3,14 @@ const { Person, CompetenceProfile, Competence, Availability, sequelize: db } = r
 const { HttpError } = require('../../errors/httpsError');
 
 /**
+ * In-memory store for application statuses.
+ * Maps person_id (number) to status string ('unhandled' | 'accepted' | 'rejected').
+ * Used because the legacy DB schema has no status column and cannot be modified.
+ * @type {Map<number, string>}
+ */
+const statusStore = new Map();
+
+/**
  * Submits a new applicant via an application record associated with their competencies and availabilities.
  * @param {Object} applicationData - The application data including person_id, competencies, and availabilities.
  * @param {number} applicationData.person_id - The ID of the person submitting the application.
@@ -135,7 +143,7 @@ async function listApplications(filters = {}, hideEmpty = true) {
   if (availFrom || availTo) {
     const conditions = [`av2.person_id = "Person"."person_id"`];
     if (availFrom) conditions.push(`av2.to_date >= ${db.escape(availFrom)}`);
-    if (availTo)   conditions.push(`av2.from_date <= ${db.escape(availTo)}`);
+    if (availTo) conditions.push(`av2.from_date <= ${db.escape(availTo)}`);
     andConditions.push(
       db.literal(`EXISTS (
         SELECT 1 FROM availability av2
@@ -182,7 +190,7 @@ async function listApplications(filters = {}, hideEmpty = true) {
     return {
       application_id: plain.person_id,
       person: plain,
-      status: "unhandled",
+      status: statusStore.get(plain.person_id) || "unhandled",
     };
   });
 }
@@ -202,8 +210,55 @@ async function listCompetencies() {
   });
 }
 
+/**
+ * Returns the current status for a given person's application.
+ * @param {number} personId - The person's ID.
+ * @returns {string} The application status.
+ */
+function getApplicationStatus(personId) {
+  return statusStore.get(personId) || 'unhandled';
+}
+
+/**
+ * Updates the status of an application in the in-memory store.
+ * Called within a Sequelize managed transaction context.
+ * @param {number} personId - The person's ID.
+ * @param {string} newStatus - The new status ('accepted', 'rejected', or 'unhandled').
+ * @param {Object} transaction - The Sequelize transaction object.
+ * @returns {Promise<Object>} The updated status record.
+ */
+async function updateApplicationStatus(personId, newStatus, transaction) {
+  if (!transaction) {
+    throw new HttpError(500, 'DB transaction is required for updating application status', 'INTERNAL_SERVER_ERROR');
+  }
+
+  const VALID_STATUSES = ['accepted', 'rejected', 'unhandled'];
+  if (!VALID_STATUSES.includes(newStatus)) {
+    throw new HttpError(400, `Invalid status: ${newStatus}. Must be one of: ${VALID_STATUSES.join(', ')}`, 'BAD_REQUEST');
+  }
+
+  // Verify that the person exists and is an applicant (role_id = 2)
+  const person = await Person.findByPk(personId, { transaction });
+  if (!person) {
+    throw new HttpError(404, 'Application not found', 'NOT_FOUND');
+  }
+
+  if (newStatus === 'unhandled') {
+    statusStore.delete(personId);
+  } else {
+    statusStore.set(personId, newStatus);
+  }
+
+  return {
+    personId: personId,
+    status: getApplicationStatus(personId),
+  };
+}
+
 module.exports = {
   submitApplication,
   listApplications,
   listCompetencies,
+  getApplicationStatus,
+  updateApplicationStatus,
 };

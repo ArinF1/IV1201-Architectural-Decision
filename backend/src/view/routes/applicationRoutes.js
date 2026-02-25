@@ -17,4 +17,7 @@ router.post('/', authenticateToken, applicationController.postApplication);
 // GET /api/applications - get list of recent applications with details
 router.get('/', authenticateToken, applicationController.getApplications);
 
+// PATCH /api/applications/:id/status - update application status (accept/reject/unhandled)
+router.patch('/:id/status', authenticateToken, applicationController.patchApplicationStatus);
+
 module.exports = router;

@@ -177,6 +177,33 @@ class ApplicationService {
         return { page: safePage, pageSize: safePageSize, totalCount, totalPages, applications: paged };
     }
 
+    /**
+     * Updates the status of an application (accepted, rejected, or unhandled).
+     * All business validation and transaction handling occurs in this layer.
+     * @param {number} personId - The person/application ID.
+     * @param {string} newStatus - The new status value.
+     * @returns {Promise<Object>} Frozen status result object.
+     */
+    async updateStatus(personId, newStatus) {
+        const VALID_STATUSES = ['accepted', 'rejected', 'unhandled'];
+
+        if (!personId || isNaN(Number(personId))) {
+            throw new HttpError(400, 'A valid application ID is required', 'BAD_REQUEST');
+        }
+
+        if (!newStatus || !VALID_STATUSES.includes(newStatus)) {
+            throw new HttpError(400, `Invalid status. Must be one of: ${VALID_STATUSES.join(', ')}`, 'BAD_REQUEST');
+        }
+
+        const result = await sequelize.transaction(async function (transaction) {
+            return applicationRepo.updateApplicationStatus(Number(personId), newStatus, transaction);
+        });
+
+        return Object.freeze({
+            applicationId: result.personId,
+            status: result.status,
+        });
+    }
 
 }
 
