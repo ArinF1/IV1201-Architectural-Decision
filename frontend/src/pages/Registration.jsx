@@ -20,6 +20,7 @@ function Registration() {
     recruiter_code: ''
   });
   const [error, setError] = useState('');
+  const [pnrError, setPnrError] = useState('');
   const [loading, setLoading] = useState(false);
 
   function handleChange(e) {
@@ -32,13 +33,18 @@ function Registration() {
   async function handleSubmit(e) {
     e.preventDefault();
     setError('');
+    setPnrError('');
     setLoading(true);
 
     try {
       await applicationAPI.registerUser(formData);
       navigate('/login');
     } catch (err) {
-      setError(t('registration.errorMessage') + ': ' + err.message);
+      if (err.code === 'INVALID_PNR') {
+        setPnrError(t('registration.invalidPnr'));
+      } else {
+        setError(t('registration.errorMessage') + ': ' + err.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -88,8 +94,11 @@ function Registration() {
             value={formData.pnr}
             onChange={handleChange}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:border-blue-500 ${pnrError ? 'border-red-500' : 'border-gray-300'}`}
           />
+          {pnrError && (
+            <p className="mt-1 text-sm text-red-600">{pnrError}</p>
+          )}
         </div>
 
         <div className="mb-4">

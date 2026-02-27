@@ -86,7 +86,8 @@ i18n
             password: 'Password',
             register: 'Register',
             registering: 'Registering...',
-            errorMessage: 'Registration failed'
+            errorMessage: 'Registration failed',
+            invalidPnr: 'Personal number must contain digits only'
           },
           login: {
             title: 'Login',
@@ -181,7 +182,8 @@ i18n
             password: 'Lösenord',
             register: 'Registrera',
             registering: 'Registrerar...',
-            errorMessage: 'Registreringen misslyckades'
+            errorMessage: 'Registreringen misslyckades',
+            invalidPnr: 'Personnumret får endast innehålla siffror'
           },
           login: {
             title: 'Logga in',

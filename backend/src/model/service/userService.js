@@ -36,6 +36,12 @@ class UserService {
             throw new HttpError(400, "Missing required registration fields", "BAD_REQUEST");
         }
 
+        if (data.pnr !== undefined && data.pnr !== null && data.pnr !== '') {
+            if (!/^\d+$/.test(data.pnr)) {
+                throw new HttpError(400, "Personal number (pnr) must contain digits only", "INVALID_PNR");
+            }
+        }
+
 
         const saltRounds = 10;
 
@@ -64,6 +70,10 @@ class UserService {
      * @throws {Error} With status 401 if credentials are invalid.
      */
     async login(username, password) {
+        if (!username || !password) {
+            throw new HttpError(400, "Username and password are required", "BAD_REQUEST");
+        }
+
         const user = await userRepo.findUserByUsername(username);
         if (!user) {
             throw new HttpError(401, "Invalid credentials", "UNAUTHORIZED");
