@@ -141,7 +141,20 @@ exports.deleteUser = async (req, res, next) => {
 exports.login = async (req, res, next) => {
   try {
     const { username, password } = req.body;
-    const { token, user } = await userService.login(username, password);
+
+    if (!username || !password) {
+      const error = new Error('Username and password are required');
+      error.status = 400;
+      throw error;
+    }
+
+    if (typeof username !== 'string' || username.trim() === '') {
+      const error = new Error('Username must be a non-empty string');
+      error.status = 400;
+      throw error;
+    }
+
+    const { token, user } = await userService.login(username.trim(), password);
 
     res.cookie('auth_token', token, {
       httpOnly: true,

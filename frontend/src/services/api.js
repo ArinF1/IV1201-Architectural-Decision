@@ -37,9 +37,13 @@ apiClient.interceptors.response.use(
   },
   function (error) {
     if (error.response) {
-      // Server responded with error status
-      const message = error.response.data?.message || 'An error occurred';
-      return Promise.reject(new Error(message));
+      // Server responded with error status — backend wraps errors as { error: { code, message } }
+      const errorBody = error.response.data?.error || {};
+      const message = errorBody.message || error.response.data?.message || 'An error occurred';
+      const code = errorBody.code || null;
+      const err = new Error(message);
+      err.code = code;
+      return Promise.reject(err);
     } else if (error.request) {
       // Request was made but no response received
       return Promise.reject(new Error('No response from server'));
