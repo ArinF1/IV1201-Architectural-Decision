@@ -54,7 +54,7 @@ function ApplicationSubmission() {
       const response = await applicationAPI.getCompetencies();
       setCompetencies(response.data.data);
     } catch (err) {
-      setError(t('applicationSubmission.failedLoadCompetencies') + ': ' + err.message);
+      setError('applicationSubmission.failedLoadCompetencies');
     }
   }
 
@@ -165,7 +165,7 @@ function ApplicationSubmission() {
     setSuccess(false);
 
     if (!validateForm()) {
-      setError(t('applicationSubmission.errorMessage'));
+      setError('applicationSubmission.errorMessage');
       return;
     }
 
@@ -199,7 +199,7 @@ function ApplicationSubmission() {
       // Scroll to top to show success message
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err) {
-      setError(t('applicationSubmission.errorMessage') + ': ' + err.message);
+      setError('applicationSubmission.errorMessage');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } finally {
       setLoading(false);
@@ -213,7 +213,7 @@ function ApplicationSubmission() {
       {error && (
         <div className="flex items-center gap-3 p-4 mb-6 bg-red-50 text-red-700 border border-red-200 rounded-lg">
           <span className="text-xl">{t('common.error')}</span>
-          {error}
+          {t(error)}
         </div>
       )}
 

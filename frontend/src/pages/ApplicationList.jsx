@@ -82,7 +82,7 @@ function ApplicationList() {
       setPageInput(String(payload?.page || page));
       setTotalPages(payload?.totalPages || 1);
     } catch (err) {
-      setError(t('applicationList.loadingApplications') + ' ' + err.message);
+      setError('applicationList.loadingApplications');
     } finally {
       setLoading(false);
     }
@@ -93,7 +93,7 @@ function ApplicationList() {
       await applicationAPI.updateApplicationStatus(applicationId, newStatus);
       await fetchApplications();
     } catch (err) {
-      setError('Failed to update status: ' + err.message);
+      setError('applicationList.updateStatusError');
     }
   }
 
@@ -108,7 +108,7 @@ function ApplicationList() {
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
           <div className="w-12 h-12 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
-          <p>Loading applications...</p>
+          <p>{ t('applicationList.loading') }</p>
         </div>
       </div>
     );
@@ -132,7 +132,7 @@ function ApplicationList() {
       {error && (
         <div className="flex items-center gap-3 p-4 mb-6 bg-red-50 text-red-700 border border-red-200 rounded-lg">
           <span className="text-xl">{t('common.error')}</span>
-          {error}
+          {t(error)}
         </div>
       )}
 
@@ -147,14 +147,14 @@ function ApplicationList() {
                 onChange={(e) => setFilter('sortBy', e.target.value, 'status')}
                 className="px-3 py-2 text-sm border border-gray-300 rounded-md bg-white cursor-pointer min-w-[180px] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               >
-                <option value="status">Status (unhandled first)</option>
-                <option value="experience">Total Experience (most first)</option>
+                <option value="status">{t('applicationList.sortStatus')}</option>
+                <option value="experience">{t('applicationList.sortExperience')}</option>
               </select>
             </div>
 
             {/* Status filter */}
             <div className="flex flex-col gap-1">
-              <label className="font-medium text-gray-700 text-xs uppercase tracking-wide">Status</label>
+              <label className="font-medium text-gray-700 text-xs uppercase tracking-wide">{t('applicationList.filterStatus')}</label>
               <select
                 value={filterStatus}
                 onChange={(e) => setFilter('status', e.target.value, 'all')}
@@ -169,13 +169,13 @@ function ApplicationList() {
 
             {/* Competence filter */}
             <div className="flex flex-col gap-1">
-              <label className="font-medium text-gray-700 text-xs uppercase tracking-wide">Competence</label>
+              <label className="font-medium text-gray-700 text-xs uppercase tracking-wide">{t('applicationList.filterCompetence')}</label>
               <select
                 value={filterCompetence}
                 onChange={(e) => setFilter('competence', e.target.value, 'all')}
                 className="px-3 py-2 text-sm border border-gray-300 rounded-md bg-white cursor-pointer min-w-[180px] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               >
-                <option value="all">All competences</option>
+                <option value="all">{t('applicationList.allCompetences')}</option>
                 {competences.map(c => (
                   <option key={c.competenceId ?? c.name} value={c.name}>{c.name}</option>
                 ))}
@@ -184,7 +184,7 @@ function ApplicationList() {
 
             {/* Min experience */}
             <div className="flex flex-col gap-1">
-              <label className="font-medium text-gray-700 text-xs uppercase tracking-wide">Min. Experience (yrs)</label>
+              <label className="font-medium text-gray-700 text-xs uppercase tracking-wide">{t('applicationList.filterMinExperience')}</label>
               <input
                 type="number"
                 min="0"
@@ -198,7 +198,7 @@ function ApplicationList() {
 
             {/* Availability overlap */}
             <div className="flex flex-col gap-1">
-              <label className="font-medium text-gray-700 text-xs uppercase tracking-wide">Available between</label>
+              <label className="font-medium text-gray-700 text-xs uppercase tracking-wide">{t('applicationList.filterAvailability')}</label>
               <div className="flex items-center gap-2">
                 <input
                   type="date"
@@ -228,7 +228,7 @@ function ApplicationList() {
                 }}
                 className="px-3 py-2 text-sm text-gray-500 border border-gray-300 rounded-md hover:bg-gray-50 self-end"
               >
-                Clear filters
+                {t('applicationList.clearFilters')}
               </button>
             )}
           </div>
@@ -246,7 +246,7 @@ function ApplicationList() {
                     <div className="p-6 border-b border-gray-200 flex justify-between items-start gap-4">
                       <div className="flex-1">
                         <h3 className="text-xl font-semibold text-slate-800 mb-1">{app.fullName}</h3>
-                        <p className="text-gray-400 text-xs">Person Number: {app.personNumber}</p>
+                        <p className="text-gray-400 text-xs">{t('applicationList.personNumber')}: {app.personNumber}</p>
                       </div>
                       <span className={`px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap ${app.status === 'accepted'
                         ? 'bg-green-100 text-green-800'
@@ -272,7 +272,7 @@ function ApplicationList() {
                           ))}
                         </ul>
                       ) : (
-                        <p className="text-gray-400 italic text-sm">No competencies listed</p>
+                        <p className="text-gray-400 italic text-sm">{t('applicationList.noCompetencies')}</p>
                       )}
                     </div>
 
@@ -289,7 +289,7 @@ function ApplicationList() {
                           ))}
                         </ul>
                       ) : (
-                        <p className="text-gray-400 italic text-sm">No availability periods listed</p>
+                        <p className="text-gray-400 italic text-sm">{t('applicationList.noAvailability')}</p>
                       )}
                     </div>
 
@@ -323,7 +323,7 @@ function ApplicationList() {
                             onClick={() => handleStatusUpdate(app.applicationId, 'unhandled')}
                             className="flex-1 bg-gray-500 text-white border-0 px-4 py-2 text-sm font-medium rounded-md cursor-pointer transition-colors hover:bg-gray-600"
                           >
-                            Mark Unhandled
+                            {t('applicationList.markUnhandled')}
                           </button>
                         </>
                       )}
@@ -339,7 +339,7 @@ function ApplicationList() {
                             onClick={() => handleStatusUpdate(app.applicationId, 'unhandled')}
                             className="flex-1 bg-gray-500 text-white border-0 px-4 py-2 text-sm font-medium rounded-md cursor-pointer transition-colors hover:bg-gray-600"
                           >
-                            Mark Unhandled
+                            {t('applicationList.markUnhandled')}
                           </button>
                         </>
                       )}
@@ -354,10 +354,10 @@ function ApplicationList() {
                   onClick={() => goToPage(page - 1)}
                   className="px-4 py-2 rounded border disabled:opacity-40"
                 >
-                  Prev
+                  {t('applicationList.prev')}
                 </button>
                 <div className="flex items-center gap-2 text-sm text-gray-700">
-                  <span>Page</span>
+                  <span>{t('applicationList.pageLabel')}</span>
                   <input
                     type="number"
                     min={1}
@@ -379,14 +379,14 @@ function ApplicationList() {
                     }}
                     className="w-16 px-2 py-1 text-center border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
                   />
-                  <span>of {totalPages}</span>
+                  <span>{t('applicationList.ofPages')} {totalPages}</span>
                 </div>
                 <button
                   disabled={page >= totalPages}
                   onClick={() => goToPage(page + 1)}
                   className="px-4 py-2 rounded border disabled:opacity-40"
                 >
-                  Next
+                  {t('applicationList.next')}
                 </button>
               </div>
             </>

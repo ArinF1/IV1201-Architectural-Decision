@@ -41,9 +41,9 @@ function Registration() {
       navigate('/login');
     } catch (err) {
       if (err.code === 'INVALID_PNR') {
-        setPnrError(t('registration.invalidPnr'));
+        setPnrError('registration.invalidPnr');
       } else {
-        setError(t('registration.errorMessage') + ': ' + err.message);
+        setError('registration.errorMessage');
       }
     } finally {
       setLoading(false);
@@ -57,7 +57,7 @@ function Registration() {
       {error && (
         <div className="flex items-center gap-3 p-4 mb-6 bg-red-50 text-red-700 border border-red-200 rounded-lg">
           <span className="text-xl">{t('common.error')}</span>
-          {error}
+          {t(error)}
         </div>
       )}
 
@@ -97,7 +97,7 @@ function Registration() {
             className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:border-blue-500 ${pnrError ? 'border-red-500' : 'border-gray-300'}`}
           />
           {pnrError && (
-            <p className="mt-1 text-sm text-red-600">{pnrError}</p>
+            <p className="mt-1 text-sm text-red-600">{t(pnrError)}</p>
           )}
         </div>
 
