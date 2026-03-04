@@ -293,45 +293,23 @@ function ApplicationList() {
                       )}
                     </div>
 
-                    {/* Action buttons - different buttons depending on current status */}
-                    <div className="p-6 flex gap-3">
-                      {(app.status || 'unhandled') === 'unhandled' && (
-                        <>
-                          <button
-                            onClick={() => handleStatusUpdate(app.applicationId, 'accepted')}
-                            className="flex-1 bg-green-600 text-white border-0 px-4 py-2 text-sm font-medium rounded-md cursor-pointer transition-colors hover:bg-green-700"
-                          >
-                            {t('applicationList.accept')}
-                          </button>
-                          <button
-                            onClick={() => handleStatusUpdate(app.applicationId, 'rejected')}
-                            className="flex-1 bg-red-600 text-white border-0 px-4 py-2 text-sm font-medium rounded-md cursor-pointer transition-colors hover:bg-red-700"
-                          >
-                            {t('applicationList.reject')}
-                          </button>
-                        </>
-                      )}
-                      {app.status === 'accepted' && (
-                        <>
-                          <button
-                            onClick={() => handleStatusUpdate(app.applicationId, 'rejected')}
-                            className="flex-1 bg-red-600 text-white border-0 px-4 py-2 text-sm font-medium rounded-md cursor-pointer transition-colors hover:bg-red-700"
-                          >
-                            {t('applicationList.reject')}
-                          </button>
-                        </>
-                      )}
-                      {app.status === 'rejected' && (
-                        <>
-                          <button
-                            onClick={() => handleStatusUpdate(app.applicationId, 'accepted')}
-                            className="flex-1 bg-green-600 text-white border-0 px-4 py-2 text-sm font-medium rounded-md cursor-pointer transition-colors hover:bg-green-700"
-                          >
-                            {t('applicationList.accept')}
-                          </button>
-                        </>
-                      )}
-                    </div>
+                    {/* Action buttons - only shown for unhandled applications */}
+                    {(app.status || 'unhandled') === 'unhandled' && (
+                      <div className="p-6 flex gap-3">
+                        <button
+                          onClick={() => handleStatusUpdate(app.applicationId, 'accepted')}
+                          className="flex-1 bg-green-600 text-white border-0 px-4 py-2 text-sm font-medium rounded-md cursor-pointer transition-colors hover:bg-green-700"
+                        >
+                          {t('applicationList.accept')}
+                        </button>
+                        <button
+                          onClick={() => handleStatusUpdate(app.applicationId, 'rejected')}
+                          className="flex-1 bg-red-600 text-white border-0 px-4 py-2 text-sm font-medium rounded-md cursor-pointer transition-colors hover:bg-red-700"
+                        >
+                          {t('applicationList.reject')}
+                        </button>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

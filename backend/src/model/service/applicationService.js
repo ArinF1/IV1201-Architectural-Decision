@@ -195,6 +195,11 @@ class ApplicationService {
             throw new HttpError(400, `Invalid status. Must be one of: ${VALID_STATUSES.join(', ')}`, 'BAD_REQUEST');
         }
 
+        const currentStatus = applicationRepo.getApplicationStatus(Number(personId));
+        if (currentStatus !== 'unhandled') {
+            throw new HttpError(409, 'Application has already been decided and cannot be changed', 'CONFLICT');
+        }
+
         const result = await sequelize.transaction(async function (transaction) {
             return applicationRepo.updateApplicationStatus(Number(personId), newStatus, transaction);
         });
