@@ -1,4 +1,4 @@
-const applicationService = require('../model/service/ApplicationService');
+const applicationService = require('../model/service/applicationService');
 const decisionMakingService = require('../model/service/decisionMakingService');
 const { HttpError } = require('../errors/httpsError');
 
