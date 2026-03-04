@@ -68,7 +68,7 @@ exports.getApplications = async (req, res, next) => {
 };
 
 /**
- * Updates the status of a specific application (accepted/rejected/unhandled).
+ * Updates the status of a specific application (accepted/rejected).
  * Recruiter-only (role_id 1).
  * @param {import('express').Request} req
  * @param {import('express').Response} res

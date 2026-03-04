@@ -178,14 +178,14 @@ class ApplicationService {
     }
 
     /**
-     * Updates the status of an application (accepted, rejected, or unhandled).
+     * Updates the status of an application (accepted or rejected).
      * All business validation and transaction handling occurs in this layer.
      * @param {number} personId - The person/application ID.
      * @param {string} newStatus - The new status value.
      * @returns {Promise<Object>} Frozen status result object.
      */
     async updateStatus(personId, newStatus) {
-        const VALID_STATUSES = ['accepted', 'rejected', 'unhandled'];
+        const VALID_STATUSES = ['accepted', 'rejected'];
 
         if (!personId || isNaN(Number(personId))) {
             throw new HttpError(400, 'A valid application ID is required', 'BAD_REQUEST');

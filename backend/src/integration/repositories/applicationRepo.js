@@ -223,7 +223,7 @@ function getApplicationStatus(personId) {
  * Updates the status of an application in the in-memory store.
  * Called within a Sequelize managed transaction context.
  * @param {number} personId - The person's ID.
- * @param {string} newStatus - The new status ('accepted', 'rejected', or 'unhandled').
+ * @param {string} newStatus - The new status ('accepted' or 'rejected').
  * @param {Object} transaction - The Sequelize transaction object.
  * @returns {Promise<Object>} The updated status record.
  */
@@ -232,7 +232,7 @@ async function updateApplicationStatus(personId, newStatus, transaction) {
     throw new HttpError(500, 'DB transaction is required for updating application status', 'INTERNAL_SERVER_ERROR');
   }
 
-  const VALID_STATUSES = ['accepted', 'rejected', 'unhandled'];
+  const VALID_STATUSES = ['accepted', 'rejected'];
   if (!VALID_STATUSES.includes(newStatus)) {
     throw new HttpError(400, `Invalid status: ${newStatus}. Must be one of: ${VALID_STATUSES.join(', ')}`, 'BAD_REQUEST');
   }
@@ -243,11 +243,7 @@ async function updateApplicationStatus(personId, newStatus, transaction) {
     throw new HttpError(404, 'Application not found', 'NOT_FOUND');
   }
 
-  if (newStatus === 'unhandled') {
-    statusStore.delete(personId);
-  } else {
-    statusStore.set(personId, newStatus);
-  }
+  statusStore.set(personId, newStatus);
 
   return {
     personId: personId,
