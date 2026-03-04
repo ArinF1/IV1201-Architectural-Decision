@@ -108,7 +108,7 @@ function ApplicationList() {
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
           <div className="w-12 h-12 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
-          <p>{ t('applicationList.loading') }</p>
+          <p>{t('applicationList.loading')}</p>
         </div>
       </div>
     );
@@ -319,12 +319,6 @@ function ApplicationList() {
                           >
                             {t('applicationList.reject')}
                           </button>
-                          <button
-                            onClick={() => handleStatusUpdate(app.applicationId, 'unhandled')}
-                            className="flex-1 bg-gray-500 text-white border-0 px-4 py-2 text-sm font-medium rounded-md cursor-pointer transition-colors hover:bg-gray-600"
-                          >
-                            {t('applicationList.markUnhandled')}
-                          </button>
                         </>
                       )}
                       {app.status === 'rejected' && (
@@ -334,12 +328,6 @@ function ApplicationList() {
                             className="flex-1 bg-green-600 text-white border-0 px-4 py-2 text-sm font-medium rounded-md cursor-pointer transition-colors hover:bg-green-700"
                           >
                             {t('applicationList.accept')}
-                          </button>
-                          <button
-                            onClick={() => handleStatusUpdate(app.applicationId, 'unhandled')}
-                            className="flex-1 bg-gray-500 text-white border-0 px-4 py-2 text-sm font-medium rounded-md cursor-pointer transition-colors hover:bg-gray-600"
-                          >
-                            {t('applicationList.markUnhandled')}
                           </button>
                         </>
                       )}
