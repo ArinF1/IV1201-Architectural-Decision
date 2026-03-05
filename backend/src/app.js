@@ -29,16 +29,18 @@ const corsOptions = {
   origin: (origin, callback) => {
     // Allow requests with no origin (e.g. server-to-server, curl, mobile apps)
     if (!origin) return callback(null, true);
-
     if (allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
-
     return callback(
       new Error(`CORS policy: origin "${origin}" is not allowed.`)
     );
   },
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Only allow these HTTP methods
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Accept-Language'], // Only allow these request headers
+  exposedHeaders: [], // Do not expose any custom response headers
+  maxAge: 600, // Preflight cache for 10 minutes
 };
 
 app.use(cors(corsOptions));
