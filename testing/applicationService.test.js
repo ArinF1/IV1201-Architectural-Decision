@@ -12,6 +12,11 @@ describe('ApplicationService', () => {
     jest.clearAllMocks();
   });
 
+    /**
+     * Tests that getApplicationsPage fetches applications from the repository,
+     * sorts them by status, and returns correctly paginated data.
+     * Verifies that the service layer correctly maps and sorts applications.
+     */
     test('getApplicationsPage should call repo and return paged applications', async () => {
       applicationRepo.listApplications = jest.fn();
       const mockRawApps = [

@@ -11,6 +11,11 @@ jest.mock('../backend/src/integration/persistence', () => ({
 describe('applicationRepo', () => {
   afterEach(() => jest.clearAllMocks());
 
+  /**
+   * Tests that submitApplication throws an error if the person does not exist in the database.
+   * Verifies that the repository layer validates that person_id exists
+   * before creating an application – protects against invalid foreign keys.
+   */
   test('submitApplication throws error if person not found', async () => {
     Person.findByPk.mockResolvedValue(null);
     await expect(
