@@ -69,33 +69,49 @@ To start the database container and then initialize it with the existing schema 
 The application is configured for deployment on cloud platforms we used - Heroku. The root `package.json` includes a `heroku-postbuild` script to automate the installation and build process for the cloud environment.
 
 ## Project Structure
-```text
 IV1201-Architectural-Decision/
 ├── backend/                       # Express.js REST API
-│   ├── db/init/                   # Database init scripts
+│   ├── db/
+│   │   ├── migrate-hash-passwords.js  # Password migration script
+│   │   └── init/                  # Database init scripts
 │   ├── src/
 │   │   ├── controllers/           # API handlers/Controllers
-│   │   ├── integration/           # Sequilize Models and DAOs
+│   │   ├── errors/                # Custom error classes
+│   │   ├── integration/
+│   │   │   ├── persistence/       # Sequelize config and table models
+│   │   │   └── repositories/      # Data access objects (DAOs)
 │   │   ├── middleware/            # Application middlewares
-│   │   ├── model/                 # Business logic/Services
+│   │   ├── model/
+│   │   │   ├── dto/               # Data transfer objects
+│   │   │   └── service/           # Business logic/Services
 │   │   ├── view/routes/           # API Routing Configuration
 │   │   ├── app.js                 # App configuration
 │   │   └── server.js              # Entry point
-│   ├── testing/                   # Jest backend tests
+│   ├── jest.config.js
 │   ├── .env.example               # Example variables
 │   └── package.json
 ├── frontend/                      # React SPA
+│   ├── public/                    # Static assets (manifest, service worker)
 │   ├── src/
 │   │   ├── components/            # UI components and Route Guards
 │   │   ├── context/               # Global states (AuthContext)
 │   │   ├── pages/                 # Full page components
 │   │   ├── services/              # External API integrations
-│   │   ├── views/                 # Additional UI Views
 │   │   ├── i18n.js                # Translations
+│   │   ├── index.css
 │   │   ├── main.jsx               # React DOM entry
 │   │   └── App.jsx                # Main Layout and Routes
 │   ├── package.json
+│   ├── tailwind.config.js
 │   └── vite.config.js             # Vite development tools
+├── testing/                       # Automated tests
+│   ├── applicationRepo.test.js    # Jest: repository layer tests
+│   ├── applicationService.test.js # Jest: service layer tests
+│   ├── errorHandler.test.js       # Jest: error handler tests
+│   ├── test.js                    # Selenium cross-browser acceptance tests
+│   ├── userController.test.js     # Jest: controller tests
+│   └── package.json
 ├── docker-compose.yml             # Postgres Database Docker set up
+├── Procfile                       # Heroku process definitions
+├── package.json
 └── README.md                      # Documentation
-```
