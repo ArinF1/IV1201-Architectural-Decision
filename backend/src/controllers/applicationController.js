@@ -17,6 +17,10 @@ exports.postApplication = async (req, res, next) => {
             throw new HttpError(401, 'Unauthorized', 'UNAUTHORIZED');
         }
 
+        if (req.user.role_id !== 2) {
+            throw new HttpError(403, 'Only applicants can submit applications', 'FORBIDDEN');
+        }
+
         const person_id = req.user.id;
         const competencies = req.body.competencies;
         const availabilities = req.body.availabilities;

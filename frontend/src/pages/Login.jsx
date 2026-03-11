@@ -46,7 +46,8 @@ function Login() {
         navigate('/');
       }
     } catch (err) {
-      setError('login.errorMessage');
+      const apiMessage = err.response?.data?.error?.message;
+      setError(apiMessage || t('login.errorMessage'));
     } finally {
       setLoading(false);
     }
@@ -59,7 +60,7 @@ function Login() {
       {error && (
         <div className="flex items-center gap-3 p-4 mb-6 bg-red-50 text-red-700 border border-red-200 rounded-lg">
           <span className="text-xl">{t('common.error')}</span>
-          {t(error)}
+          {error}
         </div>
       )}
 
